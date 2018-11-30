@@ -53,6 +53,12 @@ def log_humidity(name):
     print("Starting " + name)
     while True:
         global humidity_c
+        # Get From Fields
+        temp_c = request.form['Humidity_Value']
+        
+        # Create cursor
+        cur = mysql.connection.cursor()
+
         gevent.sleep(1)
         humidity_c = humidity_c + 1 # real sensor reading will go here.
         print("Humidity " + str(humidity_c))
