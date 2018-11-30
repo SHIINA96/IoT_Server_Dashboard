@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>ThinkAgain for real-time</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  </head>
+  <body>
+
+    <nav>
+      <div class="nav-wrapper">
+        <a href="#!" class="brand-logo">ThinkAgain</a>
+        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        <ul class="right hide-on-med-and-down">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="collapsible.html">Javascript</a></li>
+          <li><a href="mobile.html">Mobile</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <ul class="sidenav" id="mobile-demo">
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="collapsible.html">Javascript</a></li>
+      <li><a href="mobile.html">Mobile</a></li>
+    </ul>
+
+    <div class="container">
+    <div class="jumbotron">
+      <h1>Welcome to the WebSocket demo</h1>
+      <p>Github <a href='https://github.com/cognitiverobot/' target='_blank'>here.</a></p>
+    </div>
+    </div>
+
+
+
+    <div class="container" id="content">
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <div class="card-content">
+              <a class="card-title" href="">Current Temperature</a>
+              <p>Location </p>
+              <hr>
+              <p id="tempReading"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card">
+            <div class="card-content">
+              <a class="card-title" href="">Current Humidity</a>
+              <p>Location </p>
+              <hr>
+              <p id="humidityReading"></p>
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Compiled and minified JavaScript - Need for sse and materialize-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <script type="text/javascript">
+      // for WebSocket trigger and echo
+      var ws = new WebSocket("ws://localhost:5000/time");
+      var target1 = document.getElementById("tempReading");
+      var target2 = document.getElementById("humidityReading");
+         ws.onopen = function() {
+           ws.send("socket open");
+         };
+         ws.onclose = function(evt) {
+           alert("socket closed");
+         };
+         ws.onmessage = function(evt){
+           console.log(evt.data)
+           var obj = JSON.parse(evt.data);
+           console.log(obj.temp)
+           console.log(obj.humidity)
+          // var el = document.createElement("div");
+           //el.innerHTML = evt.data;
+           target1.innerHTML = obj.temp +" @" + obj.time + '<br>';
+           target2.innerHTML = obj.humidity +" @" + obj.time + '<br>';
+           //document.body.insertBefore(el, document.body.childNodes[0]);
+         };
+
+        // side nav for mobile device - part of materialize framework.
+        $('.sidenav').sidenav();
+
+    </script>
+  </body>
+
+</html>
