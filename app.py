@@ -18,7 +18,8 @@ import os, sys, time
 app = Flask(__name__)
 app.debug = True
 
-q = Queue()
+qHumi = Queue()
+qTemp = Queue()
 
 
 # To do - Class for Logger and Publisher
@@ -41,7 +42,7 @@ def log_temp(name):
 		connection.close()
 		
 		# print("temp added in the queue")
-		q.put(temp)
+		qTemp.put(temp)
 		gevent.sleep(0.5)
 
 
@@ -63,18 +64,33 @@ def log_humidity(name):
 		connection.close()
 
 		# print("humidity added in the queue")		
-		q.put(humi)
+		qHumi.put(humi)
 		gevent.sleep(0.5)
 
 # streaming logged data
-def stream_data():
+def streamTemp_data():
 	print("Starting streaming")
 	while True:
-		if not q.empty():
-			result = q.get()
-			print("sent data: ", result)
+		if not qTemp.empty():
+			resultTemp = qTemp.get()
+			print("sent data: ", resultTemp)
 			# print(result)
-			yield 'data: %s\n\n' % str(result)
+			yield 'data: %s\n\n' % str(resultTemp)
+			gevent.sleep(.4)
+		else:
+			print ("QUEUE empty!! Unable to stream @",time.ctime())
+			gevent.sleep(1) # Try again after 1 sec
+			# os._exit(1)
+			
+# streaming logged data
+def streamHumi_data():
+	print("Starting streaming")
+	while True:
+		if not qHumi.empty():
+			resultHumi = qHumi.get()
+			print("sent data: ", resultHumi)
+			# print(result)
+			yield 'data: %s\n\n' % str(resultHumi)
 			gevent.sleep(.4)
 		else:
 			print ("QUEUE empty!! Unable to stream @",time.ctime())
@@ -86,20 +102,26 @@ def index():
 	print("Index requested")
 	return render_template('home.html')
 
-@app.route('/stream/', methods=['GET', 'POST'])
-def stream():
+@app.route('/streamTemp/', methods=['GET', 'POST'])
+def streamTemp():
 	# gevent.sleep(1)
 	print("stream requested/posted")
-	return Response(stream_data(), mimetype="text/event-stream")
+	return Response(streamTemp_data(), mimetype="text/event-stream")
+	
+@app.route('/streamHumi/', methods=['GET', 'POST'])
+def streamHumi():
+	# gevent.sleep(1)
+	print("stream requested/posted")
+	return Response(streamHumi_data(), mimetype="text/event-stream")
 
 
 
 if __name__ == "__main__":
 	try:
-		th1 = threading.Thread(target=log_temp, args=("temp_logger",))
-		th2 = threading.Thread(target=log_humidity, args=("humidity_logger",))
-		th1.start()
-		th2.start()
+		thTemp = threading.Thread(target=log_temp, args=("temp_logger",))
+		thHumi = threading.Thread(target=log_humidity, args=("humidity_logger",))
+		thTemp.start()
+		thHumi.start()
 		print ("Thread(s) started..")
 	except:
 		print ("Error: unable to start thread(s)")
