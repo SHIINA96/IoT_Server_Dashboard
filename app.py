@@ -76,10 +76,10 @@ def streamTemp_data():
 			print("sent data: ", resultTemp)
 			# print(result)
 			yield 'data: %s\n\n' % str(resultTemp)
-			gevent.sleep(.4)
+			gevent.sleep(.2)
 		else:
 			print ("QUEUE empty!! Unable to stream @",time.ctime())
-			gevent.sleep(1) # Try again after 1 sec
+			gevent.sleep(.5) # Try again after 1 sec
 			# os._exit(1)
 			
 # streaming logged data
@@ -91,10 +91,10 @@ def streamHumi_data():
 			print("sent data: ", resultHumi)
 			# print(result)
 			yield 'data: %s\n\n' % str(resultHumi)
-			gevent.sleep(.4)
+			gevent.sleep(.2)
 		else:
 			print ("QUEUE empty!! Unable to stream @",time.ctime())
-			gevent.sleep(1) # Try again after 1 sec
+			gevent.sleep(.5) # Try again after 1 sec
 			# os._exit(1)
 
 @app.route('/')
