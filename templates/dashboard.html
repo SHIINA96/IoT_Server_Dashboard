@@ -1,0 +1,87 @@
+    <!DOCTYPE html>
+    <html lang="en" dir="ltr">
+      <head>
+        <meta charset="utf-8">
+        <title>ThinkAgain for real-time</title>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+      </head>
+      <body>
+
+        <nav class="grey darken-2">
+          <div class="nav-wrapper">
+            <a href="#!" class="brand-logo"> ThinkAgain</a>
+            <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <ul class="right hide-on-med-and-down">
+              <li><a href="/">Home</a></li>
+    <!--           <li><a href="/dashboard">Dashboard</a></li> -->
+              <li><a href='https://github.com/SHIINA96/IoT_Server_Dashboard'>Github</a></li>
+    <!--           <li><a href="mobile.html">Mobile</a></li> -->
+              
+              {% if session.logged_in %}
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/logout">Logout</a></li>
+              {% else %}
+                <li><a href="/register">Register</a></li>
+                <li><a href="/login">Login</a></li>
+              {% endif%}
+
+            </ul>
+          </div>
+        </nav>
+
+
+    <div class="container" id="content">
+        <div class="row">
+            <h3>Current Temperature:</h3>
+            <div id="Temperature"></div>
+<!--             <div id="Humidity"></div> -->
+            </div>
+        </div>
+    </div>
+   <div class="container" id="content">
+    <div class="row">
+      <h3>Current Humidity:</h3>
+      <div id="Humidity"></div>
+<!--             <div id="Humidity"></div> -->
+      </div>
+    </div>
+  </div>
+ 
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Compiled and minified JavaScript - Need for sse and materialize-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <script type="text/javascript">
+      // for SSE trigger
+      $(document).ready(function(){
+        function listen1() {
+            var source = new EventSource("/streamTemp/");
+            var target = document.getElementById("Temperature");
+            source.onmessage = function(msg) {
+              console.log(msg.data);
+        	     target.innerHTML = msg.data + '<br>';
+            }
+        
+        }
+        function listen2() {
+            var source = new EventSource("/streamHumi/");
+            var target = document.getElementById("Humidity");
+            source.onmessage = function(msg) {
+              console.log(msg.data);
+        	     target.innerHTML = msg.data + '<br>';
+            }
+        }    
+        listen1();
+        listen2();
+
+        // side nav for mobile device - part of materialize framework.
+        $('.sidenav').sidenav();
+      });
+
+    </script>
+  </body>
+
+</html>
+

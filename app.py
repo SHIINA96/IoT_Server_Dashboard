@@ -1,7 +1,6 @@
 # Setting sqlalchemy
 from sqlalchemy import Column, String, Integer, Date, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-
 Base = declarative_base()
 	
 # Create engine
@@ -9,8 +8,11 @@ engine = create_engine("mysql+mysqlconnector://bob:secret@localhost:3306/Arduino
 
 
 # Web setting
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, request, redirect, url_for, logging, session, flash
 from queue import Queue
+from wtforms import Form, StringField, PasswordField, validators
+from passlib.hash import sha256_crypt
+from functools import wraps
 import threading
 import gevent
 import os, sys, time
@@ -76,10 +78,10 @@ def streamTemp_data():
 			print("sent data: ", resultTemp)
 			# print(result)
 			yield 'data: %s\n\n' % str(resultTemp)
-			gevent.sleep(.2)
+			gevent.sleep(.4)
 		else:
 			print ("QUEUE empty!! Unable to stream @",time.ctime())
-			gevent.sleep(.5) # Try again after 1 sec
+			gevent.sleep(1) # Try again after 1 sec
 			# os._exit(1)
 			
 # streaming logged data
@@ -91,16 +93,117 @@ def streamHumi_data():
 			print("sent data: ", resultHumi)
 			# print(result)
 			yield 'data: %s\n\n' % str(resultHumi)
-			gevent.sleep(.2)
+			gevent.sleep(.4)
 		else:
 			print ("QUEUE empty!! Unable to stream @",time.ctime())
-			gevent.sleep(.5) # Try again after 1 sec
+			gevent.sleep(1) # Try again after 1 sec
 			# os._exit(1)
+			
+#Register Form Class
+class RegisterForm(Form):
+	name = StringField('Name', [validators.Length(min=1, max=50)])
+	username = StringField('Username', [validators.Length(min=4, max=25)])
+	email = StringField('Email', [validators.Length(min=6, max=50)])
+	password = PasswordField('Password', [
+		validators.DataRequired(),
+		validators.EqualTo('confirm', message='Password do not match')
+	])
+	confirm = PasswordField('Confirm Password')
+
 
 @app.route('/')
-def index():
+def home():
 	print("Index requested")
 	return render_template('home.html')
+	
+# dashboard Route/Page
+@app.route('/dashboard')
+def dashboard():
+	print("Dashboard")
+	return render_template('dashboard.html')
+	
+# Register route
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+	form = RegisterForm(request.form)
+	if request.method == 'POST' and form.validate():
+
+		name = form.name.data
+		email = form.email.data
+		username = form.username.data
+		password = sha256_crypt.encrypt(str(form.password.data))
+
+		connection = engine.connect()
+		connection.execute("INSERT INTO users(name, email, username, password) VALUES(%s, %s, %s, %s)", (name, email, username, password))
+		connection.close()
+
+
+		flash('Successful. You are registered. You may login.', 'success')
+
+		return redirect(url_for('login'))
+	return render_template('register.html', form=form)
+
+# Login Route
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+	if request.method == 'POST':
+		# Get Form Fields
+		username = request.form['username']
+		password_candidate = request.form['password']
+
+		# Start Connection with Database
+		connection = engine.connect()
+
+		# Execute SQL
+		username_result = connection.execute('SELECT * FROM users WHERE username= %s', [username])
+		for row in username_result:
+			result = row['username']
+		# To Tell the User is exest or not
+		if result != []:
+			# Get stored hash
+			password_result = connection.execute('SELECT password FROM users WHERE username= %s', [username])
+			for row in password_result:
+				password = row['password']
+			# Close Connection
+			connection.close()
+
+			# Compare Password
+			if sha256_crypt.verify(password_candidate, password):
+				#Passed
+				session['logged_in'] = True
+				session['username'] = username
+
+				flash('You are logged in.', 'success')
+
+				return redirect(url_for('dashboard'))
+			else:
+				error = 'Invalid login'
+				return render_template('login.html', error=error)
+
+		else:
+			error = 'Username not found'
+			return render_template('login.html', error=error)
+
+	return render_template('login.html')
+	
+# Check if user looged in
+def is_logged_in(f):
+	@wraps(f)
+	def wrap(*args, **kwargs):
+		if 'logged_in' in session:
+			return f(*args, **kwargs)
+		else:
+			flash('Unauthorized! Please login.', 'danger')
+			return redirect(url_for('login'))
+	return wrap
+
+# Logout Route
+@app.route('/logout')
+@is_logged_in
+def logout():
+	session.clear()
+	flash('You successfully logged out', 'success')
+	return redirect(url_for('login'))
 
 @app.route('/streamTemp/', methods=['GET', 'POST'])
 def streamTemp():
@@ -129,6 +232,7 @@ if __name__ == "__main__":
 	else:
 		# start streaming
 		try:
+			app.secret_key = 'verySecret#123'
 			app.run()
 		except:
 			print ("Streaming stopped")
