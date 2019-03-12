@@ -1,53 +1,19 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>ThinkAgain for real-time</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-  </head>
-  <body>
+{% extends 'layout.html'%}
 
-    <nav class="grey darken-2">
-      <div class="nav-wrapper">
-        <a href="#!" class="brand-logo"> ThinkAgain</a>
-        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-        <ul class="right hide-on-med-and-down">
-          <li><a href="/">Home</a></li>
-<!--           <li><a href="/dashboard">Dashboard</a></li> -->
-          <li><a href='https://github.com/SHIINA96/IoT_Server_Dashboard'>Github</a></li>
-<!--           <li><a href="mobile.html">Mobile</a></li> -->
-          
-          {% if session.logged_in %}
-            <li><a href="/dashboard">Dashboard</a></li>
-            <li><a href="/logout">Logout</a></li>
-          {% else %}
-            <li><a href="/register">Register</a></li>
-            <li><a href="/login">Login</a></li>
-          {% endif%}
+{% block body %}
+  <div class="jumbotron text-center">
+    <h1>Welcome to IoT-Template</h1>
+    <p class="lead"> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
-        </ul>
-      </div>
-    </nav>
-
-    <ul class="sidenav" id="mobile-demo">
-      <li><a href="/">Home</a></li>
-      <li><a href="/dashboard">Dashboard</a></li>
-      <li><a href="/login">Login</a></li>
-      <li><a href="mobile.html">Mobile</a></li>
-    </ul>
-    
-    
-    <div class="container">
-    <div class="jumbotron">
-      <h1>Welcome to the SSE demo</h1>
-      <p>Github <a href='https://github.com/SHIINA96/IoT_Server_Dashboard' target='_blank'>here.</a></p>
-    </div>
-    </div>
-
-
-    <div class="container">
-    <div class="jumbotron">
-      <h2>About Us</h2>
-      <p> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-
+    {% if session.logged_in  == NULL %}
+      <a href="/register" class="btn grey darken-2 waves-effect waves-light" >
+        <span>Register</span>
+        <!-- <i class="material-icons right">register</i> -->
+      </a>
+      <a href="/login" class="btn grey darken-2 waves-effect waves-light" >
+        <span>Login</span>
+        <!-- <i class="material-icons right">open</i> -->
+      </a>
+    {% endif %}
+  </div>
+{% endblock %}

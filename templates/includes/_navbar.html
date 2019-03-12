@@ -1,0 +1,31 @@
+<nav class="grey darken-2">
+  <div class="nav-wrapper">
+    <a href="/" class="brand-logo">ThinkAgain</a>
+    <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+    <ul class="right hide-on-med-and-down">
+      <li><a href="/">Home</a></li>
+      <li><a href='https://github.com/SHIINA96/IoT_Server_Dashboard'>Github</a></li>
+      
+
+      {% if session.logged_in %}
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/logout">Logout</a></li>
+      {% else %}
+        <li><a href="/register">Register</a></li>
+        <li><a href="/login">Login</a></li>
+      {% endif%}
+    </ul>
+  </div>
+</nav>
+
+<ul class="sidenav" id="mobile-demo">
+  <li><a href="/">Home</a></li>
+  <li><a href="/about">About</a></li>
+  {% if session.logged_in %}
+    <li><a href="/dashboard">Dashboard</a></li>
+    <li><a href="/logout">Logout</a></li>
+  {% else %}
+    <li><a href="/register">Register</a></li>
+    <li><a href="/login">Login</a></li>
+  {% endif%}
+</ul>
