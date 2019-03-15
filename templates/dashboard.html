@@ -1,18 +1,62 @@
     {% extends 'layout.html'%}
 
     {% block body %}
-      <div class="container" id="content">
-          <div class="row">
-              <h3>Current Temperatureuuu:</h3>
-              <div id="Temperature"></div>
-          </div>
-     </div>
+    <div class="jumbotron text-center">
+      <h1>Dashboard</h1>
       
-     <div class="container" id="content">
+      <h3>Sensor Data</h3>
+      
+<!--       <div class="container" id="content"> -->
+        <div class="row">
+          <div class="col s12 m6 l6">
+            <div class="card">
+              <div class="card-content">
+              <p>Current Temperature:</p>
+              <span id="Temperature"></span>
+              <hr>
+              </div>
+            </div>
+          </div>
+        </div>
+<!--         </div> -->
+        
+<!--       <div class="container" id="content"> -->
+        <div class="row">
+          <div class="col s12 m6 l6">
+            <div class="card">
+              <div class="card-content">
+              <p>Current Humidity:<p>
+              <span id="Humidity"></span>
+              <hr>
+              </div>
+            </div>
+          </div>
+        </div>
+<!--       </div> -->
+      <h3>List of the Devices</h3>
       <div class="row">
-        <h3>Current Humidity:</h3>
-        <div id="Humidity"></div>
+        {% for device in devices %}
+        <div class="col s12 m6 l6">
+          <div class="card">
+            <div class="card-content">
+              <div class="card-panel grey lighten-2" >{{device.name}} is {{device.status}}.</div>
+              <hr>
+              {% if device['status'] == 'OFF' %}
+
+              <a class="btn disabled">OFF</a>
+       	     <a class="btn grey darken-2 waves-effect waves-light" href="device/{{device.id}}/ON">ON</a>
+              {% else %}
+
+              <a class="btn grey darken-2 waves-effect waves-light" href="device/{{device.id}}/OFF">OFF</a>
+       	     <a class="btn disabled">ON</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        {% endfor %}
       </div>
+
     </div>
     
     {% endblock %}

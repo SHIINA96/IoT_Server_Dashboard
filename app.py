@@ -2,7 +2,7 @@
 from sqlalchemy import Column, String, Integer, Date, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
-    
+
 # Create engine
 engine = create_engine("mysql+mysqlconnector://bob:secret@localhost:3306/Arduino")
 
@@ -16,9 +16,13 @@ from functools import wraps
 import threading
 import gevent
 import os, sys, time
+from devices import Devices
+
 
 app = Flask(__name__)
 app.debug = True
+
+devices = Devices()
 
 qHumi = Queue()
 qTemp = Queue()
@@ -120,7 +124,7 @@ def home():
 @app.route('/dashboard')
 def dashboard():
     print("Dashboard")
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', devices=devices)
     
 # Register route
 @app.route('/register', methods=['GET', 'POST'])
@@ -216,6 +220,24 @@ def streamHumi():
     # gevent.sleep(1)
     print("stream requested/posted")
     return Response(streamHumi_data(), mimetype="text/event-stream")
+    
+
+# Device Control Route
+@app.route('/device/<string:id>/<string:action>/')
+@is_logged_in
+def device_control(id, action):
+    for index in range(len(devices)):
+        if devices[index]['id'] == str(id):
+            # Update status
+            devices[index]['status'] = action
+            connection = engine.connect()
+            connection.execute("INSERT INTO Actuator (Actuator_Name, Actuator_State) Values (%s,%s)",(id, action))
+            # Turn on/off the device
+            #Change the pin
+            print(devices[index]['pin'])
+#            flash('Successful!' + devices[index]['name'] + ' updated', 'success')
+
+    return redirect(url_for('dashboard'))
 
 
 

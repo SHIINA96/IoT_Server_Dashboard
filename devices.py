@@ -1,23 +1,23 @@
 def Devices():
     devices = [
         {
-            'id': 1,
+            'id': 'LED',
             'pin': 12,
             'name': 'Light',
-            'status':'on',
+            'status':'ON',
             'location':'Living Room'
         },
         {
-            'id': 2,
+            'id': 'RELAY',
             'pin': 11,
-            'name': 'Heater',
-            'status':'off',
+            'name': 'Relay',
+            'status':'OFF',
             'location':'Bed Room'
         },
         {
-            'id': 3,
+            'id': 'SERVO',
             'pin': 13,
-            'name': 'Robot',
+            'name': 'Servo',
             'status':'on',
             'location':'Kitchen'
         }
