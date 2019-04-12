@@ -1,87 +1,340 @@
-    {% extends 'layout.html'%}
+{% extends 'layout.html'%}
 
-    {% block body %}
-    <div class="jumbotron text-center">
-      <h1>Dashboard</h1>
-      
-      <h3>Sensor Data</h3>
-      
-<!--       <div class="container" id="content"> -->
-        <div class="row">
-          <div class="col s12 m6 l6">
-            <div class="card">
-              <div class="card-content">
-              <p>Current Temperature:</p>
-              <span id="Temperature"></span>
-              <hr>
-              </div>
-            </div>
-          </div>
-        </div>
-<!--         </div> -->
-        
-<!--       <div class="container" id="content"> -->
-        <div class="row">
-          <div class="col s12 m6 l6">
-            <div class="card">
-              <div class="card-content">
-              <p>Current Humidity:<p>
-              <span id="Humidity"></span>
-              <hr>
-              </div>
-            </div>
-          </div>
-        </div>
-<!--       </div> -->
-      <h3>List of the Devices</h3>
-      <div class="row">
-        {% for device in devices %}
-        <div class="col s12 m6 l6">
-          <div class="card">
-            <div class="card-content">
-              <div class="card-panel grey lighten-2" >{{device.name}} is {{device.status}}.</div>
-              <hr>
-              {% if device['status'] == 'OFF' %}
+{% block body %}
 
-              <a class="btn disabled">OFF</a>
-       	     <a class="btn grey darken-2 waves-effect waves-light" href="device/{{device.id}}/ON">ON</a>
-              {% else %}
+  
+<!-- <h3>Sensor Data</h3> -->
+  
+<!-- <div class="container"> -->
+  <div class="row">
 
-              <a class="btn grey darken-2 waves-effect waves-light" href="device/{{device.id}}/OFF">OFF</a>
-       	     <a class="btn disabled">ON</a>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-
-        {% endfor %}
-      </div>
-
+    <div class="col s12 m12 l8">
+        <p class="z-depth-5">
+          <div class="container-fluid" id="data-container"></div>
+          <div id="TemperatureChart"></div>
+        </p>
     </div>
+
+    <div id="card-stats">
     
-    {% endblock %}
-    
-    {% block script %}
-      function listen1() {
-          var source = new EventSource("/streamTemp/");
-          var target = document.getElementById("Temperature");
-          source.onmessage = function(msg) {
-            console.log(msg.data);
-      	     target.innerHTML = msg.data + '<br>';
-          }
+      <div class="col s4 m4 l4">
+        <div class="card animate fadeLeft">
+          <div class="card-content cyan white-text">
+            <!-- <p class="card-stats-title"><i class="material-icons">person_outline</i> Temperature</p> -->
+            <p class="card-stats-title"> Temperature</p>
+            <h4 class="card-stats-number white-text" id="Temperature"></h4>
+          </div>
+          
+          <div class="card-action cyan darken-1">
+            <div id="clients-bar" class="center-align"></div>
+            <!-- Switch -->
+              <div class="switch">
+                <label>
+                  <div class="white-text">
+                    Off
+                    <input type="checkbox">
+                    <span class="lever"></span>
+                    On
+                  </div>
+                </label>
+              </div>
+            </div>
+          
+        </div>
+      </div>
       
+      <div class="col s4 m4 l4">
+        <div class="card animate fadeLeft">
+          <div class="card-content red accent-2 white-text">
+            <!-- <p class="card-stats-title"><i class="material-icons">attach_money</i> Humidity</p> -->
+            <p class="card-stats-title"> Humidity</p>
+            <h4 class="card-stats-number white-text" id="Humidity"></h4>
+          </div>
+          
+          <div class="card-action red">
+            <div id="clients-bar" class="center-align"></div>
+            <!-- Switch -->
+              <div class="switch">
+                <label>
+                  <div class="white-text">
+                    Off
+                    <input type="checkbox">
+                    <span class="lever"></span>
+                    On
+                  </div>
+                </label>
+              </div>
+            </div>
+            
+        </div>
+      </div>
+      
+      <div class="col s4 m4 l4">
+        <div class="card animate fadeLeft">
+          <div class="card-content orange lighten-1 white-text">
+            <!-- <p class="card-stats-title"><i class="material-icons">trending_up</i> Soil Status</p> -->
+            <p class="card-stats-title"> Soil Status</p>
+            <h4 class="card-stats-number white-text" id="Soil"></h4>
+          </div>
+          
+          <div class="card-action orange">
+            <div id="clients-bar" class="center-align"></div>
+            <!-- Switch -->
+              <div class="switch">
+                <label>
+                  <div class="white-text">
+                    Off
+                    <input type="checkbox">
+                    <span class="lever"></span>
+                    On
+                  </div>
+                </label>
+              </div>
+            </div>
+          
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+
+<!-- <h3>Remote Control</h3> -->
+  <div class="row">
+    {% for device in devices %}
+    <div class="col s12 m6 l6">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-panel grey lighten-2" >{{device.name}} is {{device.status}}.</div>
+          <hr>
+          {% if device['status'] == 'OFF' %}
+
+          <a class="btn disabled">OFF</a>
+    	    <a class="btn grey darken-2 waves-effect waves-light" href="device/{{device.id}}/ON">ON</a>
+          {% else %}
+
+          <a class="btn grey darken-2 waves-effect waves-light" href="device/{{device.id}}/OFF">OFF</a>
+    	    <a class="btn disabled">ON</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {% endfor %}
+  </div>
+
+
+{% endblock %}
+
+
+{% block script %}
+
+  function listen1() 
+  {
+      var source = new EventSource("/streamTemp/");
+      var target = document.getElementById("Temperature");
+      source.onmessage = function(msg) 
+      {
+        console.log(msg.data);
+  	     target.innerHTML = msg.data + '<br>';
       }
-      function listen2() {
-          var source = new EventSource("/streamHumi/");
-          var target = document.getElementById("Humidity");
-          source.onmessage = function(msg) {
-            console.log(msg.data);
-      	     target.innerHTML = msg.data + '<br>';
+  
+  }
+  
+  function listen2() 
+  {
+      var source = new EventSource("/streamHumi/");
+      var target = document.getElementById("Humidity");
+      source.onmessage = function(msg) 
+      {
+        console.log(msg.data);
+  	     target.innerHTML = msg.data + '<br>';
+      }
+  } 
+  
+  function listen3() 
+  {
+      var source = new EventSource("/streamSoil/");
+      var target = document.getElementById("Soil");
+      source.onmessage = function(msg) 
+      {
+        console.log(msg.data);
+  	     target.innerHTML = msg.data + '<br>';
+      }
+  } 
+  
+  var chartTempValue;
+  var chartHumiValue;
+
+  function listenChart() {
+    var source = new EventSource("/streamTemperatureChart/");
+    source.onmessage = function(msg) {   
+        var point = JSON.parse(msg["data"]);
+        console.log(point[0]);
+        console.log(point[1]);
+
+        chartTempValue = point[0];
+        chartHumiValue = point[1];
+    }
+    return chartTempValue;
+    return chartHumiValue;
+}
+  
+     
+  listen1();
+  listen2();
+  listen3();
+  
+  chart = new Highcharts.Chart({
+    chart: {
+        //backgroundColor: '#00ACC1',
+        height: 625,
+        renderTo: 'data-container',
+        defaultSeriesType: 'spline',
+        shadow: true,
+        events: {
+            load:
+                function() {
+                    // set up the updating of the chart each second
+                    var series1 = this.series[0];
+                    var series2 = this.series[1];
+                    setInterval(function() {
+                        listenChart()
+                        var x = (new Date()).getTime(), // current time
+                            y = chartTempValue;
+                            z = chartHumiValue;
+                        series1.addPoint([x, y], false, true);
+                        series2.addPoint([x, z], true, true);
+                    }, 1000);
+                }
+        }
+    },
+    
+    time: {
+        useUTC: false
+    },
+
+    title: {
+        text: 'Live Temperature & Humidity Data',
+        align: 'left'
+    },
+    subtitle: {
+        text: 'Power by Highcharts',
+        align: 'left'
+    },
+
+    xAxis: {
+        type: 'datetime',
+        tickPixelInterval: 150,
+        maxZoom: 20 * 1000
+    },
+
+    yAxis: [{ // Primary yAxis
+        labels: {
+            format: '{value}°C',
+            style: {
+                color: Highcharts.getOptions().colors[0]
+            }
+        },
+        title: {
+            text: 'Temperature',
+            style: {
+                color: Highcharts.getOptions().colors[0]
+            }
+        },
+        opposite: false
+
+    }, { // Secondary yAxis
+        gridLineWidth: 0,
+        title: {
+            text: 'Humidity',
+            style: {
+                color: Highcharts.getOptions().colors[1]
+            }
+        },
+        labels: {
+            format: '{value}%rh',
+            style: {
+                color: Highcharts.getOptions().colors[1]
+            }
+        },
+        opposite: true,
+    }],
+
+    tooltip: {
+      shared: true
+    },
+
+    legend: {
+      layout: 'vertical',
+      align: 'left',
+      x: 80,
+      verticalAlign: 'top',
+      y: 55,
+      floating: true,
+      backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || 'rgba(255,255,255,0.25)'
+    },
+
+    series: [{
+        name: 'Temperature Value',
+        tooltip: {
+          valueSuffix: ' °C'
+        },
+        data: (function() {
+            // generate an array of random data
+            var data = [],
+                time = (new Date()).getTime(),
+                i;
+
+            for (i = -19; i <= 0; i++) {
+                data.push({
+                    x: time + i * 1000,
+                    y: []
+                });
+            }
+            return data;
+        })()
+    },
+            {
+        name: 'Humidity Value',
+        tooltip: {
+          valueSuffix: ' %rh'
+        },
+        data: (function() {
+            // generate an array of random data
+            var data = [],
+                time = (new Date()).getTime(),
+                i;
+
+            for (i = -19; i <= 0; i++) {
+                data.push({
+                    x: time + i * 1000,
+                    y: []
+                });
+            }
+            return data;
+        })()
+    }],
+    responsive: {
+      rules: [{
+          condition: {
+              maxWidth: 500
+          },
+          chartOptions: {
+              legend: {
+                  floating: false,
+                  layout: 'horizontal',
+                  align: 'center',
+                  verticalAlign: 'bottom',
+                  x: 0,
+                  y: 0
+              }
           }
-      }    
-      listen1();
-      listen2();
-    {% endblock %}
+      }]
+    }
+});
+  
+{% endblock %}
    
   
   

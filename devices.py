@@ -8,16 +8,16 @@ def Devices():
             'location':'Living Room'
         },
         {
-            'id': 'RELAY',
-            'pin': 11,
-            'name': 'Relay',
+            'id': 'PUMP',
+            'pin': 12,
+            'name': 'Pump',
             'status':'OFF',
             'location':'Bed Room'
         },
         {
-            'id': 'SERVO',
-            'pin': 13,
-            'name': 'Servo',
+            'id': 'FAN',
+            'pin': 4,
+            'name': 'Fan',
             'status':'on',
             'location':'Kitchen'
         }
