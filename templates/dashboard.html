@@ -20,8 +20,8 @@
       <div class="col s4 m4 l4">
         <div class="card animate fadeLeft">
           <div class="card-content cyan white-text">
-            <!-- <p class="card-stats-title"><i class="material-icons">person_outline</i> Temperature</p> -->
-            <p class="card-stats-title"> Temperature</p>
+            <p class="card-stats-title"><i class="material-icons">cloud_queue</i> Temperature</p>
+            <!-- <p class="card-stats-title"> Temperature</p> -->
             <h4 class="card-stats-number white-text" id="Temperature"></h4>
           </div>
           
@@ -46,8 +46,8 @@
       <div class="col s4 m4 l4">
         <div class="card animate fadeLeft">
           <div class="card-content red accent-2 white-text">
-            <!-- <p class="card-stats-title"><i class="material-icons">attach_money</i> Humidity</p> -->
-            <p class="card-stats-title"> Humidity</p>
+            <p class="card-stats-title"><i class="material-icons">grain</i> Humidity</p>
+            <!-- <p class="card-stats-title"> Humidity</p> -->
             <h4 class="card-stats-number white-text" id="Humidity"></h4>
           </div>
           
@@ -72,8 +72,8 @@
       <div class="col s4 m4 l4">
         <div class="card animate fadeLeft">
           <div class="card-content orange lighten-1 white-text">
-            <!-- <p class="card-stats-title"><i class="material-icons">trending_up</i> Soil Status</p> -->
-            <p class="card-stats-title"> Soil Status</p>
+            <p class="card-stats-title"><i class="material-icons">format_color_fill</i> Soil Status</p>
+            <!-- <p class="card-stats-title"> Soil Status</p> -->
             <h4 class="card-stats-number white-text" id="Soil"></h4>
           </div>
           
@@ -136,7 +136,7 @@
       source.onmessage = function(msg) 
       {
         console.log(msg.data);
-  	     target.innerHTML = msg.data + '<br>';
+  	     target.innerHTML = msg.data+ '<br>';
       }
   
   }
@@ -162,110 +162,101 @@
   	     target.innerHTML = msg.data + '<br>';
       }
   } 
-  
-  var chartTempValue;
-  var chartHumiValue;
-
-  function listenChart() {
-    var source = new EventSource("/streamTemperatureChart/");
-    source.onmessage = function(msg) {   
-        var point = JSON.parse(msg["data"]);
-        console.log(point[0]);
-        console.log(point[1]);
-
-        chartTempValue = point[0];
-        chartHumiValue = point[1];
-    }
-    return chartTempValue;
-    return chartHumiValue;
-}
-  
-     
   listen1();
   listen2();
   listen3();
-  
-  chart = new Highcharts.Chart({
-    chart: {
-        //backgroundColor: '#00ACC1',
-        height: 625,
-        renderTo: 'data-container',
-        defaultSeriesType: 'spline',
-        shadow: true,
-        events: {
-            load:
-                function() {
-                    // set up the updating of the chart each second
-                    var series1 = this.series[0];
-                    var series2 = this.series[1];
-                    setInterval(function() {
-                        listenChart()
-                        var x = (new Date()).getTime(), // current time
-                            y = chartTempValue;
-                            z = chartHumiValue;
-                        series1.addPoint([x, y], false, true);
-                        series2.addPoint([x, z], true, true);
-                    }, 1000);
-                }
-        }
-    },
-    
-    time: {
-        useUTC: false
-    },
 
-    title: {
-        text: 'Live Temperature & Humidity Data',
-        align: 'left'
-    },
-    subtitle: {
-        text: 'Power by Highcharts',
-        align: 'left'
-    },
+  var chartTempValue;
+  var chartHumiValue;
+  function listenChart() {
+    var source = new EventSource("/streamTemperatureChart/");
+    //var target = document.getElementById("TemperatureChart");
+    source.onmessage = function(msg) {
+        // console.log(msg.data);
+        var point = JSON.parse(msg["data"]);
+        console.log(point[0]);
+        console.log(point[1]);
+        console.log(point[2]);
+        //target.innerHTML = msg.data + '<br>';
+        chartTempValue = point[1];
+        chartHumiValue = point[2];
 
-    xAxis: {
-        type: 'datetime',
-        tickPixelInterval: 150,
-        maxZoom: 20 * 1000
-    },
+        var series = chart.series[0], shift = series.data.length > 20; // shift if the series is // longer than 20
+        //var series2 = chart.series2[0], shift = series.data.length > 20; // shift if the series is // longer than 20
+        console.log(series.data.length)
 
-    yAxis: [{ // Primary yAxis
-        labels: {
-            format: '{value}°C',
-            style: {
-                color: Highcharts.getOptions().colors[0]
-            }
-        },
-        title: {
-            text: 'Temperature',
-            style: {
-                color: Highcharts.getOptions().colors[0]
-            }
-        },
-        opposite: false
+        // add the point
+        var newPoint1 = [point[0],point[1]];
+        var newPoint2 = [point[0],point[2]];
 
-    }, { // Secondary yAxis
-        gridLineWidth: 0,
-        title: {
-            text: 'Humidity',
-            style: {
-                color: Highcharts.getOptions().colors[1]
-            }
-        },
-        labels: {
-            format: '{value}%rh',
-            style: {
-                color: Highcharts.getOptions().colors[1]
-            }
-        },
-        opposite: true,
-    }],
+        chart.series[0].addPoint(newPoint1, true, shift);
+        chart.series[1].addPoint(newPoint2, true, shift);
+        //chart.series2[0].addPoint(point, true, shift);
+        // console.log(chart.series[0]);
+    }
+    //return chartTempValue;
+    //return chartHumiValue;
+}
+// listen();
 
-    tooltip: {
-      shared: true
-    },
+chart = new Highcharts.Chart({
+  chart: {
+      height: 625,
+      renderTo: 'data-container',
+      defaultSeriesType: 'spline',
+      shadow: true,
+      events: {
+          load: listenChart
+      }
+  },
+  time: {
+      useUTC: false
+  },
+  title: {
+      text: 'Live Temperature & Humidity Data',
+      align: 'left'
+  },
+  subtitle: {
+      text: 'Power by Highcharts',
+      align: 'left'
+  },
+  xAxis: {
+      type: 'datetime',
+      tickPixelInterval: 150,
+      maxZoom: 20 * 1000
+  },
+  yAxis: [{ // Primary yAxis
+      labels: {
+          format: '{value}°C',
+          style: {
+              color: Highcharts.getOptions().colors[0]
+          }
+      },
+      title: {
+          text: 'Temperature',
+          style: {
+              color: Highcharts.getOptions().colors[0]
+          }
+      },
+      opposite: false
 
-    legend: {
+  }, { // Secondary yAxis
+      gridLineWidth: 0,
+      title: {
+          text: 'Humidity',
+          style: {
+              color: Highcharts.getOptions().colors[1]
+          }
+      },
+      labels: {
+          format: '{value}%rh',
+          style: {
+              color: Highcharts.getOptions().colors[1]
+          }
+      },
+      opposite: true,
+  }],
+  legend: {
       layout: 'vertical',
       align: 'left',
       x: 80,
@@ -273,158 +264,197 @@
       y: 55,
       floating: true,
       backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || 'rgba(255,255,255,0.25)'
-    },
-
-    series: [{
-        name: 'Temperature Value',
-        tooltip: {
+  },
+  series: [{
+      name: 'Temperature Value',
+      tooltip: {
           valueSuffix: ' °C'
-        },
-        data: (function() {
-            // generate an array of random data
-            var data = [],
-                time = (new Date()).getTime(),
-                i;
-
-            for (i = -19; i <= 0; i++) {
-                data.push({
-                    x: time + i * 1000,
-                    y: []
-                });
-            }
-            return data;
-        })()
-    },
-            {
-        name: 'Humidity Value',
-        tooltip: {
-          valueSuffix: ' %rh'
-        },
-        data: (function() {
-            // generate an array of random data
-            var data = [],
-                time = (new Date()).getTime(),
-                i;
-
-            for (i = -19; i <= 0; i++) {
-                data.push({
-                    x: time + i * 1000,
-                    y: []
-                });
-            }
-            return data;
-        })()
-    }],
-    responsive: {
-      rules: [{
-          condition: {
-              maxWidth: 500
-          },
-          chartOptions: {
-              legend: {
-                  floating: false,
-                  layout: 'horizontal',
-                  align: 'center',
-                  verticalAlign: 'bottom',
-                  x: 0,
-                  y: 0
-              }
-          }
-      }]
-    }
+      },
+      data: chartTempValue
+      },
+      {
+      name: 'Humidity Value',
+      tooltip: {
+      valueSuffix: ' %rh'
+      },
+      data: chartHumiValue
+  }],
 });
-  
-{% endblock %}
-   
-  
-  
-  
-<!--   Rest Code is Previous Code  -->
-<!--   Keep it in Case -->
 
-<!--     <!DOCTYPE html> -->
-<!--     <html lang="en" dir="ltr"> -->
-<!--       <head> -->
-<!--         <meta charset="utf-8"> -->
-<!--         <title>ThinkAgain for real-time</title> -->
-<!--         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> -->
-<!--         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"> -->
-<!--       </head> -->
-<!--       <body> -->
+
+
+      
+  
+<!--   var chartTempValue; -->
+<!--   var chartHumiValue; -->
 <!--  -->
-<!--         <nav class="grey darken-2"> -->
-<!--           <div class="nav-wrapper"> -->
-<!--             <a href="#!" class="brand-logo"> ThinkAgain</a> -->
-<!--             <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a> -->
-<!--             <ul class="right hide-on-med-and-down"> -->
-<!--               <li><a href="/">Home</a></li> -->
-    <!--           <li><a href="/dashboard">Dashboard</a></li> -->
-<!--               <li><a href='https://github.com/SHIINA96/IoT_Server_Dashboard'>Github</a></li> -->
-    <!--           <li><a href="mobile.html">Mobile</a></li> -->
-<!--                -->
-<!--               {% if session.logged_in %} -->
-<!--                 <li><a href="/dashboard">Dashboard</a></li> -->
-<!--                 <li><a href="/logout">Logout</a></li> -->
-<!--               {% else %} -->
-<!--                 <li><a href="/register">Register</a></li> -->
-<!--                 <li><a href="/login">Login</a></li> -->
-<!--               {% endif%} -->
+<!--   function listenChart() { -->
+<!--     var source = new EventSource("/streamTemperatureChart/"); -->
+<!--     source.onmessage = function(msg) {    -->
+<!--         var point = JSON.parse(msg["data"]); -->
+<!--         console.log(point[0]); -->
+<!--         console.log(point[1]); -->
 <!--  -->
-<!--             </ul> -->
-<!--           </div> -->
-<!--         </nav> -->
-<!--  -->
-<!--  -->
-<!--     <div class="container" id="content"> -->
-<!--         <div class="row"> -->
-<!--             <h3>Current Temperatureuuu:</h3> -->
-<!--             <div id="Temperature"></div> -->
-<!--             <div id="Humidity"></div> -->
-<!--             </div> -->
-<!--         </div> -->
-<!--     </div> -->
-<!--    <div class="container" id="content"> -->
-<!--     <div class="row"> -->
-<!--       <h3>Current Humidity:</h3> -->
-<!--       <div id="Humidity"></div> -->
-<!--             <div id="Humidity"></div> -->
-<!--       </div> -->
-<!--     </div> -->
-<!--   </div> -->
-<!--   -->
-<!--  -->
-<!--     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> -->
-    <!-- Compiled and minified JavaScript - Need for sse and materialize-->
-<!--     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script> -->
-<!--  -->
-<!--     <script type="text/javascript"> -->
-<!--       // for SSE trigger -->
-<!--       $(document).ready(function(){ -->
-<!--         function listen1() { -->
-<!--             var source = new EventSource("/streamTemp/"); -->
-<!--             var target = document.getElementById("Temperature"); -->
-<!--             source.onmessage = function(msg) { -->
-<!--               console.log(msg.data); -->
-<!--         	     target.innerHTML = msg.data + '<br>'; -->
-<!--             } -->
-<!--          -->
+<!--         chartTempValue = point[0]; -->
+<!--         chartHumiValue = point[1]; -->
+<!--     } -->
+<!--     return chartTempValue; -->
+<!--     return chartHumiValue; -->
+<!-- } -->
+<!--    -->
+<!--       -->
+<!--   listen1(); -->
+<!--   listen2(); -->
+<!--   listen3(); -->
+<!--    -->
+<!--    -->
+<!--   chart = new Highcharts.Chart({ -->
+<!--     chart: { -->
+<!--         //backgroundColor: '#00ACC1', -->
+<!--         height: 625, -->
+<!--         renderTo: 'data-container', -->
+<!--         defaultSeriesType: 'spline', -->
+<!--         shadow: true, -->
+<!--         events: { -->
+<!--             load: -->
+<!--                 function() { -->
+<!--                     // set up the updating of the chart each second -->
+<!--                     var series1 = this.series[0]; -->
+<!--                     var series2 = this.series[1]; -->
+<!--                     setTimeout(function() { -->
+<!--                         listenChart() -->
+<!--                         var x = (new Date()).getTime(), // current time -->
+<!--                             y = chartTempValue; -->
+<!--                             z = chartHumiValue; -->
+<!--                         series1.addPoint([x, y], false, true); -->
+<!--                         series2.addPoint([x, z], true, true); -->
+<!--                     }, 1000); -->
+<!--                 } -->
 <!--         } -->
-<!--         function listen2() { -->
-<!--             var source = new EventSource("/streamHumi/"); -->
-<!--             var target = document.getElementById("Humidity"); -->
-<!--             source.onmessage = function(msg) { -->
-<!--               console.log(msg.data); -->
-<!--         	     target.innerHTML = msg.data + '<br>'; -->
+<!--     }, -->
+<!--      -->
+<!--     time: { -->
+<!--         useUTC: false -->
+<!--     }, -->
+<!--  -->
+<!--     title: { -->
+<!--         text: 'Live Temperature & Humidity Data', -->
+<!--         align: 'left' -->
+<!--     }, -->
+<!--     subtitle: { -->
+<!--         text: 'Power by Highcharts', -->
+<!--         align: 'left' -->
+<!--     }, -->
+<!--  -->
+<!--     xAxis: { -->
+<!--         type: 'datetime', -->
+<!--         tickPixelInterval: 150, -->
+<!--         maxZoom: 20 * 1000 -->
+<!--     }, -->
+<!--  -->
+<!--     yAxis: [{ // Primary yAxis -->
+<!--         labels: { -->
+<!--             format: '{value}°C', -->
+<!--             style: { -->
+<!--                 color: Highcharts.getOptions().colors[0] -->
 <!--             } -->
-<!--         }     -->
-<!--         listen1(); -->
-<!--         listen2(); -->
+<!--         }, -->
+<!--         title: { -->
+<!--             text: 'Temperature', -->
+<!--             style: { -->
+<!--                 color: Highcharts.getOptions().colors[0] -->
+<!--             } -->
+<!--         }, -->
+<!--         opposite: false -->
 <!--  -->
-<!--         // side nav for mobile device - part of materialize framework. -->
-<!--         $('.sidenav').sidenav(); -->
-<!--       }); -->
+<!--     }, { // Secondary yAxis -->
+<!--         gridLineWidth: 0, -->
+<!--         title: { -->
+<!--             text: 'Humidity', -->
+<!--             style: { -->
+<!--                 color: Highcharts.getOptions().colors[1] -->
+<!--             } -->
+<!--         }, -->
+<!--         labels: { -->
+<!--             format: '{value}%rh', -->
+<!--             style: { -->
+<!--                 color: Highcharts.getOptions().colors[1] -->
+<!--             } -->
+<!--         }, -->
+<!--         opposite: true, -->
+<!--     }], -->
 <!--  -->
-<!--     </script> -->
-<!--   </body> -->
+<!--     tooltip: { -->
+<!--       shared: true -->
+<!--     }, -->
 <!--  -->
-<!-- </html> -->
+<!--     legend: { -->
+<!--       layout: 'vertical', -->
+<!--       align: 'left', -->
+<!--       x: 80, -->
+<!--       verticalAlign: 'top', -->
+<!--       y: 55, -->
+<!--       floating: true, -->
+<!--       backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || 'rgba(255,255,255,0.25)' -->
+<!--     }, -->
+<!--  -->
+<!--     series: [{ -->
+<!--         name: 'Temperature Value', -->
+<!--         tooltip: { -->
+<!--           valueSuffix: ' °C' -->
+<!--         }, -->
+<!--         data: (function() { -->
+<!--             // generate an array of random data -->
+<!--             var data = [], -->
+<!--                 time = (new Date()).getTime(), -->
+<!--                 i; -->
+<!--  -->
+<!--             for (i = -19; i <= 0; i++) { -->
+<!--                 data.push({ -->
+<!--                     x: time + i * 1000, -->
+<!--                     y: [] -->
+<!--                 }); -->
+<!--             } -->
+<!--             return data; -->
+<!--         })() -->
+<!--     }, -->
+<!--     { -->
+<!--         name: 'Humidity Value', -->
+<!--         tooltip: { -->
+<!--           valueSuffix: ' %rh' -->
+<!--         }, -->
+<!--         data: (function() { -->
+<!--             // generate an array of random data -->
+<!--             var data = [], -->
+<!--                 time = (new Date()).getTime(), -->
+<!--                 i; -->
+<!--  -->
+<!--             for (i = -19; i <= 0; i++) { -->
+<!--                 data.push({ -->
+<!--                     x: time + i * 1000, -->
+<!--                     y: [] -->
+<!--                 }); -->
+<!--             } -->
+<!--             return data; -->
+<!--         })() -->
+<!--     }], -->
+<!--     responsive: { -->
+<!--       rules: [{ -->
+<!--           condition: { -->
+<!--               maxWidth: 500 -->
+<!--           }, -->
+<!--           chartOptions: { -->
+<!--               legend: { -->
+<!--                   floating: false, -->
+<!--                   layout: 'horizontal', -->
+<!--                   align: 'center', -->
+<!--                   verticalAlign: 'bottom', -->
+<!--                   x: 0, -->
+<!--                   y: 0 -->
+<!--               } -->
+<!--           } -->
+<!--       }] -->
+<!--     } -->
+<!-- }); -->
+<!--    -->
+{% endblock %}

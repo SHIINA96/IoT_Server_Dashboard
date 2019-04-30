@@ -99,11 +99,13 @@ def log_soil(name):
         
      
 temperatureChart_value = 0
+humidityChart_value = 0
 def log_tempChart(name):
     print("Starting " + name)
     gevent.sleep(5)
     while True:
         global temperatureChart_value
+        global humidityChart_value
         connection = engine.connect()
         temperatureChart_value = connection.execute("select Temperature_Value from Temperature_Data order by Data_ID DESC LIMIT 1")
         for row in temperatureChart_value:
@@ -112,17 +114,6 @@ def log_tempChart(name):
             global temperatureChartValue
             temperatureChartValue = tempChart
         connection.close()
-
-        # print("temp added in the queue")
-        qTempChart.put(tempChart)
-        gevent.sleep(0.5)
-        
-humidityChart_value = 0
-def log_humiChart(name):
-    print("Starting " + name)
-    gevent.sleep(5)
-    while True:
-        global humidityChart_value
         connection = engine.connect()
         humidityChart_value = connection.execute("select Humidity_Value from Humidity_Data order by Data_ID DESC LIMIT 1")
         for row in humidityChart_value:
@@ -133,8 +124,28 @@ def log_humiChart(name):
         connection.close()
 
         # print("temp added in the queue")
+        qTempChart.put(tempChart)
         qHumiChart.put(humiChart)
         gevent.sleep(0.5)
+        
+# humidityChart_value = 0
+# def log_humiChart(name):
+#     print("Starting " + name)
+#     gevent.sleep(5)
+#     while True:
+#         global humidityChart_value
+#         connection = engine.connect()
+#         humidityChart_value = connection.execute("select Humidity_Value from Humidity_Data order by Data_ID DESC LIMIT 1")
+#         for row in humidityChart_value:
+#             print("Humidity:", row['Humidity_Value'])
+#             humiChart = row['Humidity_Value']
+#             global humidityChartValue
+#             humidityChartValue = humiChart
+#         connection.close()
+
+#         # print("temp added in the queue")
+#         qHumiChart.put(humiChart)
+#         gevent.sleep(0.5)
 
 ############### Logger Definition End ###############
 
@@ -189,8 +200,8 @@ def streamSoil_data():
 def streamTemperatureChart_Data():
     print("Starting streaming")
     while True:
-        if not qTempChart.empty():
-            resultTempChart = [temperatureChartValue, humidityChartValue]
+        if not qTempChart.empty() and not qHumiChart.empty():
+            resultTempChart = [(time.time())*1000, temperatureChartValue, humidityChartValue]
             print("sent temperature data: ", temperatureChartValue)
             print("sent humidity data: ", humidityChartValue)
             # print(result)
@@ -370,7 +381,7 @@ def device_control(id, action):
             # Turn on/off the device
             #Change the pin
             print(devices[index]['pin'])
-#            flash('Successful!' + devices[index]['name'] + ' updated', 'success')
+            #flash('Successful!' + devices[index]['name'] + ' updated', 'success')
 
     return redirect(url_for('dashboard'))
     
@@ -396,12 +407,12 @@ if __name__ == '__main__':
         thHumi = threading.Thread(target=log_humidity, args=("humidity_logger",))
         thSoil = threading.Thread(target=log_soil, args=("soil_logger",))
         thTempChart = threading.Thread(target=log_tempChart, args=("tempChart_logger",))
-        thHumiChart = threading.Thread(target=log_humiChart, args=("humiChart_logger",))
+        # thHumiChart = threading.Thread(target=log_humiChart, args=("humiChart_logger",))
         thTemp.start()
         thHumi.start()
         thSoil.start()
         thTempChart.start()
-        thHumiChart.start()
+        #thHumiChart.start()
         # th2.start()
         print ("Thread(s) started..")
     except:
@@ -411,7 +422,7 @@ if __name__ == '__main__':
         # start streaming
         try:
             app.secret_key = 'verySecret#123'
-            app.run(debug=True, host='127.0.0.1', port=5000)
+            app.run(debug=True, threaded = True, host='127.0.0.1', port=5000)
         except:
             print ("Streaming stopped")
             os._exit(1)
