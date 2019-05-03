@@ -7,12 +7,12 @@ Base = declarative_base()
 engine = create_engine("mysql+mysqlconnector://bob:secret@localhost:3306/Arduino")
 
 # Web setting
-from flask import Flask, render_template, make_response, Response, request, redirect, url_for, logging, session, flash
+from flask import Flask, render_template, make_response, Response, request, redirect, url_for, logging, session, flash, jsonify
 from queue import Queue
 from wtforms import Form, StringField, PasswordField, validators
 from passlib.hash import sha256_crypt
 from functools import wraps
-
+from flask_cors import CORS
 
 # A Pythone Sheet
 from devices import Devices
@@ -23,7 +23,11 @@ import gevent
 import os, sys
 import time
 
+
 app = Flask(__name__)
+#CORS(app)
+#cors = CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, supports_credentials=True)
 devices = Devices()
 
 
@@ -40,7 +44,7 @@ qHumiChart = Queue()
 
 temperature_value = 0
 def log_temp(name):
-    print("Starting " + name)
+#    print("Starting " + name)
     gevent.sleep(5)
     while True:
         global temperature_value
@@ -49,7 +53,7 @@ def log_temp(name):
         connection = engine.connect()
         temperature_value = connection.execute("select Temperature_Value from Temperature_Data order by Data_ID DESC LIMIT 1")
         for row in temperature_value:
-            print("Temperature:", row['Temperature_Value'])
+#            print("Temperature:", row['Temperature_Value'])
             temp = row['Temperature_Value']
         connection.close()
         
@@ -60,7 +64,7 @@ def log_temp(name):
 
 humidity_value = 0
 def log_humidity(name):
-    print("Starting " + name)
+#    print("Starting " + name)
     gevent.sleep(5)
     while True:
         global humidity_value
@@ -69,7 +73,7 @@ def log_humidity(name):
         connection = engine.connect()
         humidity_value = connection.execute("select Humidity_Value from Humidity_Data order by Data_ID DESC LIMIT 1")
         for row in humidity_value:
-            print("Humidity:", row['Humidity_Value'])
+#            print("Humidity:", row['Humidity_Value'])
             humi = row['Humidity_Value']
         connection.close()
 
@@ -80,7 +84,7 @@ def log_humidity(name):
 
 soil_value = 0
 def log_soil(name):
-    print("Starting " + name)
+#    print("Starting " + name)
     gevent.sleep(5)
     while True:
         global soil_value
@@ -89,7 +93,7 @@ def log_soil(name):
         connection = engine.connect()
         soil_value = connection.execute("select Soil_State from Soil_Moisture_Data order by Data_ID DESC LIMIT 1")
         for row in soil_value:
-            print("Soil State:", row['Soil_State'])
+#            print("Soil State:", row['Soil_State'])
             soil = row['Soil_State']
         connection.close()
 
@@ -101,7 +105,7 @@ def log_soil(name):
 temperatureChart_value = 0
 humidityChart_value = 0
 def log_tempChart(name):
-    print("Starting " + name)
+    #print("Starting " + name)
     gevent.sleep(5)
     while True:
         global temperatureChart_value
@@ -109,7 +113,7 @@ def log_tempChart(name):
         connection = engine.connect()
         temperatureChart_value = connection.execute("select Temperature_Value from Temperature_Data order by Data_ID DESC LIMIT 1")
         for row in temperatureChart_value:
-            print("Temperature:", row['Temperature_Value'])
+            #print("Temperature:", row['Temperature_Value'])
             tempChart = row['Temperature_Value']
             global temperatureChartValue
             temperatureChartValue = tempChart
@@ -117,7 +121,7 @@ def log_tempChart(name):
         connection = engine.connect()
         humidityChart_value = connection.execute("select Humidity_Value from Humidity_Data order by Data_ID DESC LIMIT 1")
         for row in humidityChart_value:
-            print("Humidity:", row['Humidity_Value'])
+            #print("Humidity:", row['Humidity_Value'])
             humiChart = row['Humidity_Value']
             global humidityChartValue
             humidityChartValue = humiChart
@@ -127,25 +131,6 @@ def log_tempChart(name):
         qTempChart.put(tempChart)
         qHumiChart.put(humiChart)
         gevent.sleep(0.5)
-        
-# humidityChart_value = 0
-# def log_humiChart(name):
-#     print("Starting " + name)
-#     gevent.sleep(5)
-#     while True:
-#         global humidityChart_value
-#         connection = engine.connect()
-#         humidityChart_value = connection.execute("select Humidity_Value from Humidity_Data order by Data_ID DESC LIMIT 1")
-#         for row in humidityChart_value:
-#             print("Humidity:", row['Humidity_Value'])
-#             humiChart = row['Humidity_Value']
-#             global humidityChartValue
-#             humidityChartValue = humiChart
-#         connection.close()
-
-#         # print("temp added in the queue")
-#         qHumiChart.put(humiChart)
-#         gevent.sleep(0.5)
 
 ############### Logger Definition End ###############
 
@@ -153,81 +138,65 @@ def log_tempChart(name):
 ############### Stream Definition Start ###############
 # streaming logged data
 def streamTemp_data():
-    print("Starting streaming")
+    #print("Starting streaming")
     while True:
         if not qTemp.empty():
             resultTemp = qTemp.get()
-            print("sent data: ", resultTemp)
+            #print("sent data: ", resultTemp)
             # print(result)
             yield 'data: %s\n\n' % str(resultTemp)
             gevent.sleep(.4)
         else:
-            print ("QUEUE empty!! Unable to stream @",time.ctime())
+            #print ("QUEUE empty!! Unable to stream @",time.ctime())
             gevent.sleep(1) # Try again after 1 sec
             # os._exit(1)
  
            
 def streamHumi_data():
-    print("Starting streaming")
+    #print("Starting streaming")
     while True:
         if not qHumi.empty():
             resultHumi = qHumi.get()
-            print("sent data: ", resultHumi)
+            #print("sent data: ", resultHumi)
             # print(result)
             yield 'data: %s\n\n' % str(resultHumi)
             gevent.sleep(.4)
         else:
-            print ("QUEUE empty!! Unable to stream @",time.ctime())
+            #print ("QUEUE empty!! Unable to stream @",time.ctime())
             gevent.sleep(1) # Try again after 1 sec
             # os._exit(1)
             
 
 def streamSoil_data():
-    print("Starting streaming")
+    #print("Starting streaming")
     while True:
         if not qSoil.empty():
             resultSoil = qSoil.get()
-            print("sent data: ", resultSoil)
+            #print("sent data: ", resultSoil)
             # print(result)
             yield 'data: %s\n\n' % str(resultSoil)
             gevent.sleep(.4)
         else:
-            print ("QUEUE empty!! Unable to stream @",time.ctime())
+            #print ("QUEUE empty!! Unable to stream @",time.ctime())
             gevent.sleep(1) # Try again after 1 sec
             # os._exit(1)
             
             
 def streamTemperatureChart_Data():
-    print("Starting streaming")
+    #print("Starting streaming")
     while True:
         if not qTempChart.empty() and not qHumiChart.empty():
             resultTempChart = [(time.time())*1000, temperatureChartValue, humidityChartValue]
-            print("sent temperature data: ", temperatureChartValue)
-            print("sent humidity data: ", humidityChartValue)
+            #print("sent temperature data: ", temperatureChartValue)
+            #print("sent humidity data: ", humidityChartValue)
             # print(result)
             # yield 'data: %s\n\n' % str(result)
             yield 'data: ' + json.dumps(resultTempChart) + "\n\n"
             gevent.sleep(1)
         else:
-            print ("QUEUE empty!! Unable to stream @",time.time())
+            #print ("QUEUE empty!! Unable to stream @",time.time())
             gevent.sleep(1) # Try again after 1 sec
             # os._exit(1)
-            
-#def streamHumidityChart_Data():
-#    print("Starting streaming")
-#    while True:
-#        if not qHumiChart.empty():
-#            resultHumiChart = [(time.time()+43200) * 1000, humidityChartValue]
-#            print("sent data: ", resultHumiChart)
-#            # print(result)
-#            # yield 'data: %s\n\n' % str(result)
-#            yield 'data: ' + json.dumps(resultHumiChart) + "\n\n"
-#            gevent.sleep(1)
-#        else:
-#            print ("QUEUE empty!! Unable to stream @",time.time())
-#            gevent.sleep(1) # Try again after 1 sec
-#            # os._exit(1)
-
 
 ############### Stream Definition End ###############
   
@@ -252,13 +221,13 @@ class RegisterForm(Form):
 # Home page route
 @app.route('/')
 def home():
-    print("Index requested")
+    #print("Index requested")
     return render_template('home.html')
     
 # dashboard Route/Page
 @app.route('/dashboard')
 def dashboard():
-    print("Dashboard")
+    #print("Dashboard")
     return render_template('dashboard.html', devices=devices)
     
 # Register route
@@ -350,53 +319,64 @@ def logout():
 @app.route('/streamTemp/', methods=['GET', 'POST'])
 def streamTemp():
     # gevent.sleep(1)
-    print("stream requested/posted")
+    #print("stream requested/posted")
     return Response(streamTemp_data(), mimetype="text/event-stream")
   
 # Humidity Data Upload Route
 @app.route('/streamHumi/', methods=['GET', 'POST'])
 def streamHumi():
     # gevent.sleep(1)
-    print("stream requested/posted")
+    #print("stream requested/posted")
     return Response(streamHumi_data(), mimetype="text/event-stream")
  
 # Soil Moisture Data Upload Route   
 @app.route('/streamSoil/', methods=['GET', 'POST'])
 def streamSoil():
     # gevent.sleep(1)
-    print("stream requested/posted")
+    #print("stream requested/posted")
     return Response(streamSoil_data(), mimetype="text/event-stream")
-
-
-# Device Control Route
-@app.route('/device/<string:id>/<string:action>/')
-@is_logged_in
-def device_control(id, action):
-    for index in range(len(devices)):
-        if devices[index]['id'] == str(id):
-            # Update status
-            devices[index]['status'] = action
-            connection = engine.connect()
-            connection.execute("INSERT INTO Actuator (Actuator_Name, Actuator_State) Values (%s,%s)",(id, action))
-            # Turn on/off the device
-            #Change the pin
-            print(devices[index]['pin'])
-            #flash('Successful!' + devices[index]['name'] + ' updated', 'success')
-
-    return redirect(url_for('dashboard'))
-    
 
 @app.route('/streamTemperatureChart/', methods=['GET', 'POST'])
 def streamTemperatureChart():
     # gevent.sleep(1)
-    print("stream requested/posted")
+    #print("stream requested/posted")
     return Response(streamTemperatureChart_Data(), mimetype="text/event-stream")
 
-#@app.route('/streamHumidityChart/', methods=['GET', 'POST'])
-#def streamHumidityChart():
-#    # gevent.sleep(1)
-#    print("stream requested/posted")
-#    return Response(streamHumidityChart_Data(), mimetype="text/event-stream")
+
+# #  Old Device Control Route
+# @app.route('/device/<string:id>/<string:action>/', methods=['GET','POST'])
+# @is_logged_in
+# def device_control(id, action):
+#     for index in range(len(devices)):
+#         if devices[index]['id'] == str(id):
+#             # Update status
+#             devices[index]['status'] = action
+#             connection = engine.connect()
+#             connection.execute("INSERT INTO Actuator (Actuator_Name, Actuator_State) Values (%s,%s)",(id, action))
+#             # Turn on/off the device
+#             # Change the pin
+#             print(devices[index]['pin'])
+#             #flash('Successful!' + devices[index]['name'] + ' updated', 'success')
+#     return redirect(url_for('dashboard'))
+    
+# Device Control Route
+@app.route('/devices', methods=['POST'])
+@is_logged_in
+def decives():
+    if request.method == "POST":
+        json = request.get_json()
+        device = json["device"]
+        status = json["status"]
+        controlType = json['controlType']
+        connection = engine.connect()
+        connection.execute("INSERT INTO Actuator (Actuator_Name, Actuator_State, Control_Type) Values (%s,%s,%s)",(device, status, controlType))
+        print(device)
+        print(status)
+        print(controlType)
+    # else:
+        return jsonify(device = device)
+        
+
 
 
 ############### Route Definition End ###############
@@ -407,12 +387,10 @@ if __name__ == '__main__':
         thHumi = threading.Thread(target=log_humidity, args=("humidity_logger",))
         thSoil = threading.Thread(target=log_soil, args=("soil_logger",))
         thTempChart = threading.Thread(target=log_tempChart, args=("tempChart_logger",))
-        # thHumiChart = threading.Thread(target=log_humiChart, args=("humiChart_logger",))
         thTemp.start()
         thHumi.start()
         thSoil.start()
         thTempChart.start()
-        #thHumiChart.start()
         # th2.start()
         print ("Thread(s) started..")
     except:
@@ -423,6 +401,7 @@ if __name__ == '__main__':
         try:
             app.secret_key = 'verySecret#123'
             app.run(debug=True, threaded = True, host='127.0.0.1', port=5000)
+
         except:
             print ("Streaming stopped")
             os._exit(1)

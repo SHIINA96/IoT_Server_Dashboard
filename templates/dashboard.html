@@ -31,10 +31,11 @@
               <div class="switch">
                 <label>
                   <div class="white-text">
-                    Off
-                    <input type="checkbox">
+                    Fan Status: &ensp;
+                    off
+                    <input type="checkbox", id="FAN">
                     <span class="lever"></span>
-                    On
+                    on
                   </div>
                 </label>
               </div>
@@ -57,10 +58,11 @@
               <div class="switch">
                 <label>
                   <div class="white-text">
-                    Off
-                    <input type="checkbox">
+                    LED: Status: &ensp;
+                    off
+                    <input type="checkbox" id="LED">
                     <span class="lever"></span>
-                    On
+                    on
                   </div>
                 </label>
               </div>
@@ -83,10 +85,11 @@
               <div class="switch">
                 <label>
                   <div class="white-text">
-                    Off
-                    <input type="checkbox">
+                    Pump Status: &ensp;  
+                    off
+                    <input type="checkbox" id="PUMP">
                     <span class="lever"></span>
-                    On
+                    on
                   </div>
                 </label>
               </div>
@@ -100,34 +103,93 @@
 
 
 <!-- <h3>Remote Control</h3> -->
-  <div class="row">
-    {% for device in devices %}
-    <div class="col s12 m6 l6">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-panel grey lighten-2" >{{device.name}} is {{device.status}}.</div>
-          <hr>
-          {% if device['status'] == 'OFF' %}
-
-          <a class="btn disabled">OFF</a>
-    	    <a class="btn grey darken-2 waves-effect waves-light" href="device/{{device.id}}/ON">ON</a>
-          {% else %}
-
-          <a class="btn grey darken-2 waves-effect waves-light" href="device/{{device.id}}/OFF">OFF</a>
-    	    <a class="btn disabled">ON</a>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-    {% endfor %}
-  </div>
+<!--   <div class="row"> -->
+<!--     {% for device in devices %} -->
+<!--     <div class="col s12 m6 l6"> -->
+<!--       <div class="card"> -->
+<!--         <div class="card-content"> -->
+<!--           <div class="card-panel grey lighten-2" >{{device.name}} is {{device.status}}.</div> -->
+<!--           <hr> -->
+<!--           {% if device['status'] == 'OFF' %} -->
+<!--  -->
+<!--           <a class="btn disabled">OFF</a> -->
+<!--     	    <a class="btn grey darken-2 waves-effect waves-light" href="device/{{device.id}}/ON">ON</a> -->
+<!--           {% else %} -->
+<!--  -->
+<!--           <a class="btn grey darken-2 waves-effect waves-light" href="device/{{device.id}}/OFF">OFF</a> -->
+<!--     	    <a class="btn disabled">ON</a> -->
+<!--           {% endif %} -->
+<!--         </div> -->
+<!--       </div> -->
+<!--     </div> -->
+<!--  -->
+<!--     {% endfor %} -->
+<!--   </div> -->
 
 
 {% endblock %}
 
 
 {% block script %}
+
+  function remoteControlAjax(){
+    $.ajax({
+      url : "/devices",
+      method : "post",
+      dataType: "json",
+      data : JSON.stringify(data),
+      contentType: 'application/json; charset=utf-8',
+      success: function(){
+        console.log(data)
+      }})
+  }
+ 
+  var data;
+
+  $("input").change(function() {
+    if($(id="#FAN").is(":checked")) {
+    //if($('#Fan').attr('checked', true)) {
+    //if($(id='#FAN').prop('checked', true)){
+      console.log("Is checked");
+      data = {'device': 'FAN','status': 'ON', 'controlType': 'Remote'};
+      remoteControlAjax();
+    }
+
+    //else if($(id='#FAN').prop('checked', false)){
+    else if ($(id="#FAN").not(":checked")){
+      console.log("Is Not checked");
+      //window.location.href="device/LED/OFF";
+      data = {'device': 'FAN','status': 'OFF', 'controlType': 'Remote'};
+      remoteControlAjax();
+    }
+  })
+
+  $("input").change(function() {
+    if($(id="#LED").is(":checked")) {
+      console.log("Is checked");
+      data = {'device': 'LED','status': 'ON', 'controlType': 'Remote'};
+      remoteControlAjax();
+    }
+
+    else if ($(id="#LED").not(":checked")){
+      console.log("Is Not checked");
+      data = {'device': 'LED','status': 'OFF', 'controlType': 'Remote'};
+      remoteControlAjax();
+    }})
+
+  $("input").change(function() {
+    if($(id="#PUMP").is(":checked")) {
+      console.log("Is checked");
+      data = {'device': 'PUMP','status': 'ON', 'controlType': 'Remote'};
+      remoteControlAjax();
+    }
+
+    else if ($(id="#PUMP").not(":checked")){
+      console.log("Is Not checked");
+      data = {'device': 'PUMP','status': 'OFF', 'controlType': 'Remote'};
+      remoteControlAjax();
+    }})
+
 
   function listen1() 
   {
@@ -138,7 +200,6 @@
         console.log(msg.data);
   	     target.innerHTML = msg.data+ '<br>';
       }
-  
   }
   
   function listen2() 
@@ -201,6 +262,7 @@
 
 chart = new Highcharts.Chart({
   chart: {
+      //marginRight: 100,
       height: 625,
       renderTo: 'data-container',
       defaultSeriesType: 'spline',
@@ -227,13 +289,13 @@ chart = new Highcharts.Chart({
   },
   yAxis: [{ // Primary yAxis
       labels: {
-          format: '{value}°C',
+          format: '{value}',
           style: {
-              color: Highcharts.getOptions().colors[0]
+              color: '#808080' //Highcharts.getOptions().colors[3]
           }
       },
       title: {
-          text: 'Temperature',
+          text: 'Temperature / ℃',
           style: {
               color: Highcharts.getOptions().colors[0]
           }
@@ -242,19 +304,19 @@ chart = new Highcharts.Chart({
 
   }, { // Secondary yAxis
       gridLineWidth: 0,
-      title: {
-          text: 'Humidity',
-          style: {
-              color: Highcharts.getOptions().colors[1]
-          }
-      },
       labels: {
-          format: '{value}%rh',
+        format: '{value}',
+        style: {
+            color: Highcharts.getOptions().colors[1]
+        }
+    },
+      title: {
+          text: 'Humidity / %rh',
           style: {
               color: Highcharts.getOptions().colors[1]
           }
       },
-      opposite: true,
+      opposite: false,
   }],
   legend: {
       layout: 'vertical',
