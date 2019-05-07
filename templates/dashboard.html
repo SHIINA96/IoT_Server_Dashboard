@@ -132,7 +132,7 @@
 
 {% block script %}
 
-  enableCookieCheckBox();
+enableCookieCheckBox();
 
   function remoteControlAjax(){
     $.ajax({
@@ -148,7 +148,7 @@
  
   var data;
 
-  $("input").change(function() {
+  $($(id="#FAN")).change(function() {
     if($(id="#FAN").is(":checked")) {
     //if($('#Fan').attr('checked', true)) {
     //if($(id='#FAN').prop('checked', true)){
@@ -165,7 +165,7 @@
     }
   })
 
-  $("input").change(function() {
+  $($(id="#LED")).change(function() {
     if($(id="#LED").is(":checked")) {
       console.log("Is checked");
       data = {'device': 'LED','status': 'ON', 'controlType': 'Remote'};
@@ -177,7 +177,7 @@
       remoteControlAjax();
     }})
 
-  $("input").change(function() {
+  $($(id="#PUMP")).change(function() {
     if($(id="#PUMP").is(":checked")) {
       console.log("Is checked");
       data = {'device': 'PUMP','status': 'ON', 'controlType': 'Remote'};
