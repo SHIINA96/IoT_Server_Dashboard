@@ -2,32 +2,29 @@
 
 {% block body %}
 
-  
-<!-- <h3>Sensor Data</h3> -->
-  
-<!-- <div class="container"> -->
   <div class="row">
-
+    <!-- Chart Section Begin -->
     <div class="col s12 m12 l8">
         <p class="z-depth-5">
           <div class="container-fluid" id="data-container"></div>
           <div id="TemperatureChart"></div>
         </p>
     </div>
+    <!-- Chart Section End -->
 
     <div id="card-stats">
+    <!-- Card Section Begin -->
     
       <div class="col s4 m4 l4">
         <div class="card animate fadeLeft">
           <div class="card-content cyan white-text">
             <p class="card-stats-title"><i class="material-icons">cloud_queue</i> Temperature</p>
-            <!-- <p class="card-stats-title"> Temperature</p> -->
             <h4 class="card-stats-number white-text" id="Temperature"></h4>
           </div>
           
           <div class="card-action cyan darken-1">
             <div id="clients-bar" class="center-align"></div>
-            <!-- Switch -->
+            <!-- Fan Switch Section Begin -->
               <div class="switch">
                 <label>
                   <div class="white-text">
@@ -39,6 +36,7 @@
                   </div>
                 </label>
               </div>
+            <!-- Fan Switch Section End -->
             </div>
           
         </div>
@@ -48,24 +46,24 @@
         <div class="card animate fadeLeft">
           <div class="card-content red accent-2 white-text">
             <p class="card-stats-title"><i class="material-icons">grain</i> Humidity</p>
-            <!-- <p class="card-stats-title"> Humidity</p> -->
             <h4 class="card-stats-number white-text" id="Humidity"></h4>
           </div>
           
           <div class="card-action red">
             <div id="clients-bar" class="center-align"></div>
-            <!-- Switch -->
+            <!-- LED Switch Section Begin-->
               <div class="switch">
                 <label>
                   <div class="white-text">
                     LED: Status: &ensp;
                     off
-                    <input type="checkbox" id="LED">
+                    <input type="checkbox" id="LED" data-cookie-checkbox="true" data-cookie-checkbox-key="CookieCheckBoxSample2" data-cookie-checkbox-value="02">
                     <span class="lever"></span>
                     on
                   </div>
                 </label>
               </div>
+            <!-- LED Switch Section End -->
             </div>
             
         </div>
@@ -75,64 +73,39 @@
         <div class="card animate fadeLeft">
           <div class="card-content orange lighten-1 white-text">
             <p class="card-stats-title"><i class="material-icons">format_color_fill</i> Soil Status</p>
-            <!-- <p class="card-stats-title"> Soil Status</p> -->
             <h4 class="card-stats-number white-text" id="Soil"></h4>
           </div>
           
           <div class="card-action orange">
             <div id="clients-bar" class="center-align"></div>
-            <!-- Switch -->
+            <!-- Pump Switch Section Begin-->
               <div class="switch">
                 <label>
                   <div class="white-text">
                     Pump Status: &ensp;  
                     off
-                    <input type="checkbox" id="PUMP">
+                    <input type="checkbox" id="PUMP" data-cookie-checkbox="true" data-cookie-checkbox-key="CookieCheckBoxSample3" data-cookie-checkbox-value="03">
                     <span class="lever"></span>
                     on
                   </div>
                 </label>
               </div>
+            <!-- Pump Switch Section End -->
             </div>
           
         </div>
       </div>
       
     </div>
+    <!-- Card Seciton End -->
   </div>
-
-
-<!-- <h3>Remote Control</h3> -->
-<!--   <div class="row"> -->
-<!--     {% for device in devices %} -->
-<!--     <div class="col s12 m6 l6"> -->
-<!--       <div class="card"> -->
-<!--         <div class="card-content"> -->
-<!--           <div class="card-panel grey lighten-2" >{{device.name}} is {{device.status}}.</div> -->
-<!--           <hr> -->
-<!--           {% if device['status'] == 'OFF' %} -->
-<!--  -->
-<!--           <a class="btn disabled">OFF</a> -->
-<!--     	    <a class="btn grey darken-2 waves-effect waves-light" href="device/{{device.id}}/ON">ON</a> -->
-<!--           {% else %} -->
-<!--  -->
-<!--           <a class="btn grey darken-2 waves-effect waves-light" href="device/{{device.id}}/OFF">OFF</a> -->
-<!--     	    <a class="btn disabled">ON</a> -->
-<!--           {% endif %} -->
-<!--         </div> -->
-<!--       </div> -->
-<!--     </div> -->
-<!--  -->
-<!--     {% endfor %} -->
-<!--   </div> -->
-
 
 {% endblock %}
 
 
 {% block script %}
 
-  enableCookieCheckBox();
+enableCookieCheckBox();
 
   function remoteControlAjax(){
     $.ajax({
@@ -148,7 +121,7 @@
  
   var data;
 
-  $("input").change(function() {
+  $($(id="#FAN")).change(function() {
     if($(id="#FAN").is(":checked")) {
     //if($('#Fan').attr('checked', true)) {
     //if($(id='#FAN').prop('checked', true)){
@@ -165,7 +138,7 @@
     }
   })
 
-  $("input").change(function() {
+  $($(id="#LED")).change(function() {
     if($(id="#LED").is(":checked")) {
       console.log("Is checked");
       data = {'device': 'LED','status': 'ON', 'controlType': 'Remote'};
@@ -177,7 +150,7 @@
       remoteControlAjax();
     }})
 
-  $("input").change(function() {
+  $($(id="#PUMP")).change(function() {
     if($(id="#PUMP").is(":checked")) {
       console.log("Is checked");
       data = {'device': 'PUMP','status': 'ON', 'controlType': 'Remote'};
@@ -341,184 +314,4 @@ chart = new Highcharts.Chart({
       data: chartHumiValue
   }],
 });
-
-
-
-
-
-
-      
-  
-<!--   var chartTempValue; -->
-<!--   var chartHumiValue; -->
-<!--  -->
-<!--   function listenChart() { -->
-<!--     var source = new EventSource("/streamTemperatureChart/"); -->
-<!--     source.onmessage = function(msg) {    -->
-<!--         var point = JSON.parse(msg["data"]); -->
-<!--         console.log(point[0]); -->
-<!--         console.log(point[1]); -->
-<!--  -->
-<!--         chartTempValue = point[0]; -->
-<!--         chartHumiValue = point[1]; -->
-<!--     } -->
-<!--     return chartTempValue; -->
-<!--     return chartHumiValue; -->
-<!-- } -->
-<!--    -->
-<!--       -->
-<!--   listen1(); -->
-<!--   listen2(); -->
-<!--   listen3(); -->
-<!--    -->
-<!--    -->
-<!--   chart = new Highcharts.Chart({ -->
-<!--     chart: { -->
-<!--         //backgroundColor: '#00ACC1', -->
-<!--         height: 625, -->
-<!--         renderTo: 'data-container', -->
-<!--         defaultSeriesType: 'spline', -->
-<!--         shadow: true, -->
-<!--         events: { -->
-<!--             load: -->
-<!--                 function() { -->
-<!--                     // set up the updating of the chart each second -->
-<!--                     var series1 = this.series[0]; -->
-<!--                     var series2 = this.series[1]; -->
-<!--                     setTimeout(function() { -->
-<!--                         listenChart() -->
-<!--                         var x = (new Date()).getTime(), // current time -->
-<!--                             y = chartTempValue; -->
-<!--                             z = chartHumiValue; -->
-<!--                         series1.addPoint([x, y], false, true); -->
-<!--                         series2.addPoint([x, z], true, true); -->
-<!--                     }, 1000); -->
-<!--                 } -->
-<!--         } -->
-<!--     }, -->
-<!--      -->
-<!--     time: { -->
-<!--         useUTC: false -->
-<!--     }, -->
-<!--  -->
-<!--     title: { -->
-<!--         text: 'Live Temperature & Humidity Data', -->
-<!--         align: 'left' -->
-<!--     }, -->
-<!--     subtitle: { -->
-<!--         text: 'Power by Highcharts', -->
-<!--         align: 'left' -->
-<!--     }, -->
-<!--  -->
-<!--     xAxis: { -->
-<!--         type: 'datetime', -->
-<!--         tickPixelInterval: 150, -->
-<!--         maxZoom: 20 * 1000 -->
-<!--     }, -->
-<!--  -->
-<!--     yAxis: [{ // Primary yAxis -->
-<!--         labels: { -->
-<!--             format: '{value}°C', -->
-<!--             style: { -->
-<!--                 color: Highcharts.getOptions().colors[0] -->
-<!--             } -->
-<!--         }, -->
-<!--         title: { -->
-<!--             text: 'Temperature', -->
-<!--             style: { -->
-<!--                 color: Highcharts.getOptions().colors[0] -->
-<!--             } -->
-<!--         }, -->
-<!--         opposite: false -->
-<!--  -->
-<!--     }, { // Secondary yAxis -->
-<!--         gridLineWidth: 0, -->
-<!--         title: { -->
-<!--             text: 'Humidity', -->
-<!--             style: { -->
-<!--                 color: Highcharts.getOptions().colors[1] -->
-<!--             } -->
-<!--         }, -->
-<!--         labels: { -->
-<!--             format: '{value}%rh', -->
-<!--             style: { -->
-<!--                 color: Highcharts.getOptions().colors[1] -->
-<!--             } -->
-<!--         }, -->
-<!--         opposite: true, -->
-<!--     }], -->
-<!--  -->
-<!--     tooltip: { -->
-<!--       shared: true -->
-<!--     }, -->
-<!--  -->
-<!--     legend: { -->
-<!--       layout: 'vertical', -->
-<!--       align: 'left', -->
-<!--       x: 80, -->
-<!--       verticalAlign: 'top', -->
-<!--       y: 55, -->
-<!--       floating: true, -->
-<!--       backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || 'rgba(255,255,255,0.25)' -->
-<!--     }, -->
-<!--  -->
-<!--     series: [{ -->
-<!--         name: 'Temperature Value', -->
-<!--         tooltip: { -->
-<!--           valueSuffix: ' °C' -->
-<!--         }, -->
-<!--         data: (function() { -->
-<!--             // generate an array of random data -->
-<!--             var data = [], -->
-<!--                 time = (new Date()).getTime(), -->
-<!--                 i; -->
-<!--  -->
-<!--             for (i = -19; i <= 0; i++) { -->
-<!--                 data.push({ -->
-<!--                     x: time + i * 1000, -->
-<!--                     y: [] -->
-<!--                 }); -->
-<!--             } -->
-<!--             return data; -->
-<!--         })() -->
-<!--     }, -->
-<!--     { -->
-<!--         name: 'Humidity Value', -->
-<!--         tooltip: { -->
-<!--           valueSuffix: ' %rh' -->
-<!--         }, -->
-<!--         data: (function() { -->
-<!--             // generate an array of random data -->
-<!--             var data = [], -->
-<!--                 time = (new Date()).getTime(), -->
-<!--                 i; -->
-<!--  -->
-<!--             for (i = -19; i <= 0; i++) { -->
-<!--                 data.push({ -->
-<!--                     x: time + i * 1000, -->
-<!--                     y: [] -->
-<!--                 }); -->
-<!--             } -->
-<!--             return data; -->
-<!--         })() -->
-<!--     }], -->
-<!--     responsive: { -->
-<!--       rules: [{ -->
-<!--           condition: { -->
-<!--               maxWidth: 500 -->
-<!--           }, -->
-<!--           chartOptions: { -->
-<!--               legend: { -->
-<!--                   floating: false, -->
-<!--                   layout: 'horizontal', -->
-<!--                   align: 'center', -->
-<!--                   verticalAlign: 'bottom', -->
-<!--                   x: 0, -->
-<!--                   y: 0 -->
-<!--               } -->
-<!--           } -->
-<!--       }] -->
-<!--     } -->
-<!-- }); -->
-<!--    -->
 {% endblock %}
