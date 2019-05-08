@@ -25,8 +25,6 @@ import time
 
 
 app = Flask(__name__)
-#CORS(app)
-#cors = CORS(app, resources={r"/*": {"origins": "*"}})
 CORS(app, supports_credentials=True)
 devices = Devices()
 
@@ -44,7 +42,7 @@ qHumiChart = Queue()
 
 temperature_value = 0
 def log_temp(name):
-#    print("Starting " + name)
+    # print("Starting " + name)
     gevent.sleep(5)
     while True:
         global temperature_value
@@ -53,7 +51,7 @@ def log_temp(name):
         connection = engine.connect()
         temperature_value = connection.execute("select Temperature_Value from Temperature_Data order by Data_ID DESC LIMIT 1")
         for row in temperature_value:
-#            print("Temperature:", row['Temperature_Value'])
+            # print("Temperature:", row['Temperature_Value'])
             temp = row['Temperature_Value']
         connection.close()
         
@@ -64,7 +62,7 @@ def log_temp(name):
 
 humidity_value = 0
 def log_humidity(name):
-#    print("Starting " + name)
+    # print("Starting " + name)
     gevent.sleep(5)
     while True:
         global humidity_value
@@ -73,7 +71,7 @@ def log_humidity(name):
         connection = engine.connect()
         humidity_value = connection.execute("select Humidity_Value from Humidity_Data order by Data_ID DESC LIMIT 1")
         for row in humidity_value:
-#            print("Humidity:", row['Humidity_Value'])
+            # print("Humidity:", row['Humidity_Value'])
             humi = row['Humidity_Value']
         connection.close()
 
@@ -84,7 +82,7 @@ def log_humidity(name):
 
 soil_value = 0
 def log_soil(name):
-#    print("Starting " + name)
+    # print("Starting " + name)
     gevent.sleep(5)
     while True:
         global soil_value
@@ -93,7 +91,7 @@ def log_soil(name):
         connection = engine.connect()
         soil_value = connection.execute("select Soil_State from Soil_Moisture_Data order by Data_ID DESC LIMIT 1")
         for row in soil_value:
-#            print("Soil State:", row['Soil_State'])
+            # print("Soil State:", row['Soil_State'])
             soil = row['Soil_State']
         connection.close()
 
@@ -336,28 +334,12 @@ def streamSoil():
     #print("stream requested/posted")
     return Response(streamSoil_data(), mimetype="text/event-stream")
 
+# Highcharts Route
 @app.route('/streamTemperatureChart/', methods=['GET', 'POST'])
 def streamTemperatureChart():
     # gevent.sleep(1)
     #print("stream requested/posted")
     return Response(streamTemperatureChart_Data(), mimetype="text/event-stream")
-
-
-# #  Old Device Control Route
-# @app.route('/device/<string:id>/<string:action>/', methods=['GET','POST'])
-# @is_logged_in
-# def device_control(id, action):
-#     for index in range(len(devices)):
-#         if devices[index]['id'] == str(id):
-#             # Update status
-#             devices[index]['status'] = action
-#             connection = engine.connect()
-#             connection.execute("INSERT INTO Actuator (Actuator_Name, Actuator_State) Values (%s,%s)",(id, action))
-#             # Turn on/off the device
-#             # Change the pin
-#             print(devices[index]['pin'])
-#             #flash('Successful!' + devices[index]['name'] + ' updated', 'success')
-#     return redirect(url_for('dashboard'))
     
 # Device Control Route
 @app.route('/devices', methods=['POST'])
@@ -376,10 +358,8 @@ def decives():
     # else:
         return jsonify(device = device)
         
-
-
-
 ############### Route Definition End ###############
+
 
 if __name__ == '__main__':
     try:
@@ -391,7 +371,6 @@ if __name__ == '__main__':
         thHumi.start()
         thSoil.start()
         thTempChart.start()
-        # th2.start()
         print ("Thread(s) started..")
     except:
         print ("Error: unable to start thread(s)")
