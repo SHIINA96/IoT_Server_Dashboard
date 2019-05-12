@@ -100,6 +100,191 @@
     <!-- Card Seciton End -->
   </div>
 
+  
+
+
+  <div class="row">
+      <div class="col s12 m6 l6">
+        <div id="Weather Forecast Cards">
+          <!-- Card Section Begin -->  
+          <div class="col s12 m12 l12">
+            <div class="card animate fadeLeft">
+              <div class="card-content cyan white-text">
+                <p class="card-stats-title"><i class="material-icons">cloud_queue</i>{{forecastTime1}}</p>
+                <h6 class="card-stats-number white-text">{{forecastTemperature1}} °C</h6>
+              </div>
+              <div class="card-action cyan darken-1 white-text">
+                <div id="clients-bar">{{forecastWeather1}}</div>
+              </div>
+            </div>
+          </div>
+          <!-- Card Section End -->
+
+          <!-- Card Section Begin -->  
+          <div class="col s12 m12 l12">
+            <div class="card animate fadeLeft">
+              <div class="card-content red accent-2 white-text">
+                <p class="card-stats-title"><i class="material-icons">cloud_queue</i>{{forecastTime2}}</p>
+                <h6 class="card-stats-number white-text">{{forecastTemperature2}} °C</h6>
+              </div>
+              <div class="card-action red accent-2 darken-1 white-text">
+                <div id="clients-bar">{{forecastWeather2}}</div>
+              </div>
+            </div>
+          </div>
+          <!-- Card Section End -->
+
+          <!-- Card Section Begin -->  
+          <div class="col s12 m12 l12">
+            <div class="card animate fadeLeft">
+              <div class="card-content orange lighten-1 white-text">
+                <p class="card-stats-title"><i class="material-icons">cloud_queue</i>{{forecastTime3}}</p>
+                <h6 class="card-stats-number white-text">{{forecastTemperature3}} °C</h6>
+              </div>
+              <div class="card-action orange lighten-1 darken-1 white-text">
+                <div id="clients-bar">{{forecastWeather3}}</div>
+              </div>
+            </div>
+          </div>
+          <!-- Card Section End -->
+
+          <!-- Card Section Begin -->  
+          <div class="col s12 m12 l12">
+            <div class="card animate fadeLeft">
+              <div class="card-content green lighten-1 white-text">
+                <p class="card-stats-title"><i class="material-icons">cloud_queue</i>{{forecastTime4}}</p>
+                <h6 class="card-stats-number white-text">{{forecastTemperature4}} °C</h6>
+              </div>
+              <div class="card-action green lighten-1 darken-1 white-text">
+                <div id="clients-bar">{{forecastWeather4}}</div>
+              </div>
+            </div>
+          </div>
+          <!-- Card Section End -->
+        </div>
+      </div>
+
+      <div class="col s12 m6 l6">
+        <div id="Local Weather Table">
+          <div class="card">
+            <ul class="collection with-header">
+              <li class="collection-header"><h4>Local Weather</h4></li>
+              <li class="collection-item"><div>Sky<a class="secondary-content">{{sky}}</a></div></li>
+              <li class="collection-item"><div>Temperature<a class="secondary-content">{{temp}} °C</a></div></li>
+              <li class="collection-item"><div>Pressure<a class="secondary-content">{{pressure}} Pa</a></div></li>
+              <li class="collection-item"><div>Humidity<a class="secondary-content">{{humidity}} %rh</a></div></li>
+              <li class="collection-item"><div>Maximum Temperature<a class="secondary-content">{{tempMax}} °C</a></div></li>
+              <li class="collection-item"><div>Minimum Temperature<a class="secondary-content">{{tempMin}} °C</a></div></li>
+              <li class="collection-item"><div>Visibility<a class="secondary-content">{{visibility}} m</a></div></li>
+              <li class="collection-item"><div>WindSpeed<a class="secondary-content">{{windSpeed}} m/s</a></div></li>
+              <li class="collection-item"><div>WindDegree<a class="secondary-content">{{windDegree}} °</a></div></li>
+              <li class="collection-item"><div>Cloudiness<a class="secondary-content">{{cloudiness}} %</a></div></li>
+              <li class="collection-item"><div>Sunrise Time<a class="secondary-content">{{sunrise}}</a></div></li>
+              <li class="collection-item"><div>Sunset Time<a class="secondary-content">{{sunset}}</a></div></li>
+              <li class="collection-item"><div>City<a class="secondary-content">{{city}}</a></div></li>
+              <li class="collection-item"><div>Country<a class="secondary-content">{{country}}</a></div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+  </div>
+
+  <div class="row">
+    <div class="col s12 m12 l12">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">Weather Forecast</span>
+            <div id="ForecastTable">
+                  <table>
+                    <thead>
+                      <tr>
+                          <th>Time</th>
+                          <th>Describe</th>
+                          <th>Temperature</th>
+                          <th>Humidity</th>
+                          <th>Pressure</th>
+                          <th>Wind Speed</th>
+                      </tr>
+                    </thead>
+            
+                    <tbody>
+                      <tr>
+                        <td>{{forecastTime1}}</td>
+                        <td>{{forecastWeather1}}</td>
+                        <td>{{forecastTemperature1}}</td>
+                        <td>{{forecastHumidity1}}</td>
+                        <td>{{forecastPressure1}}</td>
+                        <td>{{forecastWindSpeed1}}</td>
+                      </tr>
+                      <tr>
+                        <td>{{forecastTime2}}</td>
+                        <td>{{forecastWeather2}}</td>
+                        <td>{{forecastTemperature2}}</td>
+                        <td>{{forecastHumidity2}}</td>
+                        <td>{{forecastPressure2}}</td>
+                        <td>{{forecastWindSpeed2}}</td>
+                      </tr>
+                      <tr>
+                        <td>{{forecastTime3}}</td>
+                        <td>{{forecastWeather3}}</td>
+                        <td>{{forecastTemperature3}}</td>
+                        <td>{{forecastHumidity3}}</td>
+                        <td>{{forecastPressure3}}</td>
+                        <td>{{forecastWindSpeed3}}</td>
+                      </tr>
+                      <tr>
+                        <td>{{forecastTime4}}</td>
+                        <td>{{forecastWeather4}}</td>
+                        <td>{{forecastTemperature4}}</td>
+                        <td>{{forecastHumidity4}}</td>
+                        <td>{{forecastPressure4}}</td>
+                        <td>{{forecastWindSpeed4}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+      <div class="col s12 m12 l12">
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title">Analysis</span>
+              <div id="Analysis Table">
+                    <table>
+                      <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Mean</th>
+                            <th>Median</th>
+                            <th>Mode</th>
+                        </tr>
+                      </thead>
+              
+                      <tbody>
+                        <tr>
+                          <td>Temperature</td>
+                          <td id="tempMean"></td>
+                          <td id="tempMedian"></td>
+                          <td id="tempMode"></td>
+                        </tr>
+                        <tr>
+                          <td>Humidity</td>
+                          <td id="humiMean"></td>
+                          <td id="humiMedian"></td>
+                          <td id="humiMode"></td>
+                        </tr>
+                      </tbody>
+                    </table>
+              </div>
+            </div>
+        </div>
+      </div>
+ 
+
 {% endblock %}
 
 
@@ -163,60 +348,75 @@ enableCookieCheckBox();
     }});
   
 
-  function listen1() 
+  function listenLiveData() 
   {
       var source = new EventSource("/streamTemp/");
-      var target = document.getElementById("Temperature");
+      //var target = document.getElementById("Temperature");
       source.onmessage = function(msg) 
       {
         console.log(msg.data);
-  	     target.innerHTML = msg.data+ '<br>';
+        //target.innerHTML = msg.data+ '<br>';
+        var point3 = JSON.parse(msg["data"]);
+        Temperature = point3[0];
+        document.getElementById("Temperature").innerHTML = Temperature;
+        Humidity = point3[1];
+        document.getElementById("Humidity").innerHTML = Humidity;
+        Soil = point3[2];
+        document.getElementById("Soil").innerHTML = Soil;
+
       }
   }
   
-  function listen2() 
+
+  function listenTemperatureAnalysis() 
   {
-      var source = new EventSource("/streamHumi/");
-      var target = document.getElementById("Humidity");
-      source.onmessage = function(msg) 
-      {
-        console.log(msg.data);
-  	     target.innerHTML = msg.data + '<br>';
-      }
-  } 
-  
-  function listen3() 
+    var source = new EventSource("/streamTemperatureAnalysis/");
+    source.onmessage = function(msg) 
+    {
+      console.log(msg.data);
+      var point1 = JSON.parse(msg["data"]);
+
+      tempMean = point1[0];
+      document.getElementById("tempMean").innerHTML = tempMean;
+      tempMedian = point1[1];
+      document.getElementById("tempMedian").innerHTML = tempMedian;
+      tempMode = point1[2];
+      document.getElementById("tempMode").innerHTML = tempMode;
+    }
+  }
+
+  function listenHumidityAnalysis()
   {
-      var source = new EventSource("/streamSoil/");
-      var target = document.getElementById("Soil");
-      source.onmessage = function(msg) 
-      {
-        console.log(msg.data);
-  	     target.innerHTML = msg.data + '<br>';
-      }
-  } 
-  listen1();
-  listen2();
-  listen3();
+    var source = new EventSource("/streamHumidityAnalysis/");
+    source.onmessage = function(msg) 
+    {
+      console.log(msg.data);
+      var point2 = JSON.parse(msg["data"]);
+      
+      humiMean = point2[0];
+      document.getElementById("humiMean").innerHTML = humiMean;
+      humiMedian = point2[1];
+      document.getElementById("humiMedian").innerHTML = humiMedian;
+      humiMode = point2[2];
+      document.getElementById("humiMode").innerHTML = humiMode;
+    }
+  }
+
+  listenLiveData();
+  listenTemperatureAnalysis();
+  listenHumidityAnalysis();
 
   var chartTempValue;
   var chartHumiValue;
   function listenChart() {
     var source = new EventSource("/streamTemperatureChart/");
-    //var target = document.getElementById("TemperatureChart");
+
     source.onmessage = function(msg) {
-        // console.log(msg.data);
         var point = JSON.parse(msg["data"]);
-        console.log(point[0]);
-        console.log(point[1]);
-        console.log(point[2]);
-        //target.innerHTML = msg.data + '<br>';
         chartTempValue = point[1];
         chartHumiValue = point[2];
 
         var series = chart.series[0], shift = series.data.length > 20; // shift if the series is // longer than 20
-        //var series2 = chart.series2[0], shift = series.data.length > 20; // shift if the series is // longer than 20
-        console.log(series.data.length)
 
         // add the point
         var newPoint1 = [point[0],point[1]];
@@ -224,13 +424,9 @@ enableCookieCheckBox();
 
         chart.series[0].addPoint(newPoint1, true, shift);
         chart.series[1].addPoint(newPoint2, true, shift);
-        //chart.series2[0].addPoint(point, true, shift);
-        // console.log(chart.series[0]);
     }
-    //return chartTempValue;
-    //return chartHumiValue;
 }
-// listen();
+
 
 chart = new Highcharts.Chart({
   chart: {

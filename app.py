@@ -18,6 +18,8 @@ from flask_cors import CORS
 from devices import Devices
 
 import json
+import datetime
+import requests
 import threading
 import gevent
 import os, sys
@@ -28,12 +30,19 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 devices = Devices()
 
-
 qHumi = Queue()
 qTemp = Queue()
 qSoil = Queue()
 qTempChart = Queue()
 qHumiChart = Queue()
+
+qTemperatureMedian = Queue()
+qTemperatureMean = Queue()
+qTemperatureMode = Queue()
+
+qHumidityMedian = Queue()
+qHumidityMean = Queue()
+qHumidityMode = Queue()
 
 ############### Logger Definition Start ###############
 # To do - Class for Logger and Publisher
@@ -41,11 +50,13 @@ qHumiChart = Queue()
 # To do - Error handling.
 
 temperature_value = 0
+humidity_value = 0
+soil_value = 0
 def log_temp(name):
     # print("Starting " + name)
     gevent.sleep(5)
     while True:
-        global temperature_value
+        global temperature_value, humidity_value, soil_value
         
         # Pull data from database
         connection = engine.connect()
@@ -53,52 +64,35 @@ def log_temp(name):
         for row in temperature_value:
             # print("Temperature:", row['Temperature_Value'])
             temp = row['Temperature_Value']
+            global temperatureLiveValue
+            temperatureLiveValue = temp
         connection.close()
-        
-        # print("temp added in the queue")
-        qTemp.put(temp)
-        gevent.sleep(0.5)
 
-
-humidity_value = 0
-def log_humidity(name):
-    # print("Starting " + name)
-    gevent.sleep(5)
-    while True:
-        global humidity_value
-        
         # Pull data from database
         connection = engine.connect()
         humidity_value = connection.execute("select Humidity_Value from Humidity_Data order by Data_ID DESC LIMIT 1")
         for row in humidity_value:
             # print("Humidity:", row['Humidity_Value'])
             humi = row['Humidity_Value']
+            global humidityLiveValue
+            humidityLiveValue = humi
         connection.close()
 
-        # print("humidity added in the queue")		
-        qHumi.put(humi)
-        gevent.sleep(0.5)
-   
-
-soil_value = 0
-def log_soil(name):
-    # print("Starting " + name)
-    gevent.sleep(5)
-    while True:
-        global soil_value
-        
         # Pull data from database
         connection = engine.connect()
         soil_value = connection.execute("select Soil_State from Soil_Moisture_Data order by Data_ID DESC LIMIT 1")
         for row in soil_value:
             # print("Soil State:", row['Soil_State'])
             soil = row['Soil_State']
+            global soilLiveValue
+            soilLiveValue = soil
         connection.close()
-
-        # print("Moisture added in the queue")		
-        qSoil.put(soil)
-        gevent.sleep(0.5)
         
+        # print("temp added in the queue")
+        qTemp.put(temp)
+        qHumi.put(humi)
+        qSoil.put(soil)
+        gevent.sleep(0.5)        
      
 temperatureChart_value = 0
 humidityChart_value = 0
@@ -130,6 +124,79 @@ def log_tempChart(name):
         qHumiChart.put(humiChart)
         gevent.sleep(0.5)
 
+
+temperatureMean_value = 0
+temperatureMedian_value = 0
+temperatureMode_value = 0
+def log_tempAnalysis(name):
+    gevent.sleep(5)
+    while True:
+        global temperatureMean_value, temperatureMedian_value, temperatureMode_value
+        connection = engine.connect()
+        temperatureMean_value = connection.execute("select Temperature_Mean from Temperature_Analysis where Temperature_Mean is not null order by Data_ID DESC limit 1")
+        for row in temperatureMean_value:
+            tempMean = row['Temperature_Mean']
+            global temperatureMeanValue
+            temperatureMeanValue = tempMean
+        connection.close()
+
+        connection = engine.connect()
+        temperatureMedian_value = connection.execute("select Temperature_Median from Temperature_Analysis where Temperature_Median is not null order by Data_ID DESC limit 1")
+        for row in temperatureMedian_value:
+            tempMedian = row['Temperature_Median']
+            global temperatureMedianValue
+            temperatureMedianValue = tempMedian
+        connection.close()
+
+        connection = engine.connect()
+        temperatureMode_value = connection.execute("select Temperature_Mode from Temperature_Analysis where Temperature_Mode is not null order by Data_ID DESC limit 1")
+        for row in temperatureMode_value:
+            tempMode = row['Temperature_Mode']
+            global temperatureModeValue
+            temperatureModeValue = tempMode
+        connection.close()
+
+        qTemperatureMean.put(tempMean)
+        qTemperatureMedian.put(tempMedian)
+        qTemperatureMode.put(tempMode)
+        gevent.sleep(0.5)
+
+humidityMean_value = 0
+humidityMedian_value = 0
+humidityMode_value = 0
+def log_humiAnalysis(name):
+    gevent.sleep(5)
+    while True:
+        global humidityMean_value, humidityMedian_value, humidityMode_value
+        connection = engine.connect()
+        humidityMean_value = connection.execute("select Humidity_Mean from Humidity_Analysis where Humidity_Mean is not null order by Data_ID DESC limit 1")
+        for row in humidityMean_value:
+            humiMean = row['Humidity_Mean']
+            global humidityMeanValue
+            humidityMeanValue = humiMean
+        connection.close()
+
+        connection = engine.connect()
+        humidityMedian_value = connection.execute("select Humidity_Median from Humidity_Analysis where Humidity_Median is not null order by Data_ID DESC limit 1")
+        for row in humidityMedian_value:
+            humiMedian = row['Humidity_Median']
+            global humidityMedianValue
+            humidityMedianValue = humiMedian
+        connection.close()
+
+        connection = engine.connect()
+        humidityMode_value = connection.execute("select Humidity_Mode from Humidity_Analysis where Humidity_Mode is not null order by Data_ID DESC limit 1")
+        for row in humidityMode_value:
+            humiMode = row['Humidity_Mode']
+            global humidityModeValue
+            humidityModeValue = humiMode
+        connection.close()
+
+        qHumidityMean.put(humiMean)
+        qHumidityMedian.put(humiMedian)
+        qHumidityMode.put(humiMode)
+        gevent.sleep(0.5)
+
 ############### Logger Definition End ###############
 
 
@@ -138,63 +205,53 @@ def log_tempChart(name):
 def streamTemp_data():
     #print("Starting streaming")
     while True:
-        if not qTemp.empty():
-            resultTemp = qTemp.get()
-            #print("sent data: ", resultTemp)
-            # print(result)
-            yield 'data: %s\n\n' % str(resultTemp)
+        if not qTemp.empty() and not qHumi.empty() and not qSoil.empty():
+            resultLiveData = [temperatureLiveValue, humidityLiveValue, soilLiveValue]
+            yield 'data: ' + json.dumps(resultLiveData) + "\n\n"
             gevent.sleep(.4)
         else:
-            #print ("QUEUE empty!! Unable to stream @",time.ctime())
             gevent.sleep(1) # Try again after 1 sec
             # os._exit(1)
- 
-           
-def streamHumi_data():
-    #print("Starting streaming")
-    while True:
-        if not qHumi.empty():
-            resultHumi = qHumi.get()
-            #print("sent data: ", resultHumi)
-            # print(result)
-            yield 'data: %s\n\n' % str(resultHumi)
-            gevent.sleep(.4)
-        else:
-            #print ("QUEUE empty!! Unable to stream @",time.ctime())
-            gevent.sleep(1) # Try again after 1 sec
-            # os._exit(1)
-            
-
-def streamSoil_data():
-    #print("Starting streaming")
-    while True:
-        if not qSoil.empty():
-            resultSoil = qSoil.get()
-            #print("sent data: ", resultSoil)
-            # print(result)
-            yield 'data: %s\n\n' % str(resultSoil)
-            gevent.sleep(.4)
-        else:
-            #print ("QUEUE empty!! Unable to stream @",time.ctime())
-            gevent.sleep(1) # Try again after 1 sec
-            # os._exit(1)
-            
             
 def streamTemperatureChart_Data():
     #print("Starting streaming")
     while True:
         if not qTempChart.empty() and not qHumiChart.empty():
             resultTempChart = [(time.time())*1000, temperatureChartValue, humidityChartValue]
-            #print("sent temperature data: ", temperatureChartValue)
-            #print("sent humidity data: ", humidityChartValue)
-            # print(result)
-            # yield 'data: %s\n\n' % str(result)
             yield 'data: ' + json.dumps(resultTempChart) + "\n\n"
             gevent.sleep(1)
         else:
-            #print ("QUEUE empty!! Unable to stream @",time.time())
             gevent.sleep(1) # Try again after 1 sec
             # os._exit(1)
+
+def streamTemperatureAnalysis_data():
+    while True:
+        if not qTemperatureMean.empty() and not qTemperatureMedian.empty() and not qTemperatureMode.empty():
+            resultTemperatureAnalysis = [temperatureMeanValue, temperatureMedianValue, temperatureModeValue]
+            yield 'data: ' + json.dumps(resultTemperatureAnalysis) + "\n\n"
+            gevent.sleep(1)
+        else:
+            gevent.sleep(1)
+
+def streamHumidityAnalysis_data():
+    while True:
+        if not qHumidityMean.empty() and not qHumidityMedian.empty() and not qHumidityMode.empty():
+            resultHumidityAnalysis = [humidityMeanValue, humidityMedianValue, humidityModeValue]
+            yield 'data: ' + json.dumps(resultHumidityAnalysis) + "\n\n"
+            gevent.sleep(1)
+        else:
+            gevent.sleep(1)
+
+def time_converter(time: int) -> str:
+    """
+    Convert time from server format (unix timestamp), to readable human format.
+    :param time: server unix timestamp.
+    :return: readable human time format.
+    """
+    converted_time = datetime.datetime.fromtimestamp(
+        int(time)
+    ).strftime('%I:%M %p')
+    return converted_time
 
 ############### Stream Definition End ###############
   
@@ -219,14 +276,62 @@ class RegisterForm(Form):
 # Home page route
 @app.route('/')
 def home():
+    
     #print("Index requested")
     return render_template('home.html')
     
 # dashboard Route/Page
 @app.route('/dashboard')
 def dashboard():
+
+    # For Current Temperature
+    r1 = requests.get('http://api.openweathermap.org/data/2.5/weather?id=2193734&mode=json&units=metric&APPID=32e936bdd92d8f51716f169539355294')
+    json_object1 = r1.json()
+    sky = json_object1['weather'][0]['main']
+    temp = json_object1['main']['temp']
+    pressure = json_object1['main']['pressure']
+    humidity = json_object1['main']['humidity']
+    tempMax = json_object1['main']['temp_max']
+    tempMin = json_object1['main']['temp_min']
+    visibility = json_object1['visibility']
+    windSpeed = json_object1['wind']['speed']
+    windDegree = json_object1['wind']['deg']
+    cloudiness = json_object1['clouds']['all']
+    sunrise=time_converter(json_object1['sys']['sunrise'])
+    sunset=time_converter(json_object1['sys']['sunset'])
+    city=json_object1['name']
+    country = json_object1['sys']['country']
+
+    # For weather Forecast
+    r2 = requests.get('http://api.openweathermap.org/data/2.5/forecast?q=Auckland,nz&mode=json&units=metric&APPID=32e936bdd92d8f51716f169539355294')
+    json_object2 = r2.json()
+    forecastTime1 = time_converter(json_object2['list'][2]['dt'])
+    forecastWeather1 = json_object2['list'][2]['weather'][0]['description']
+    forecastTemperature1 = json_object2['list'][2]['main']['temp']
+    forecastHumidity1 = json_object2['list'][2]['main']['humidity']
+    forecastPressure1 = json_object2['list'][2]['main']['pressure']
+    forecastWindSpeed1 = json_object2['list'][2]['wind']['speed']
+    forecastTime2 = time_converter(json_object2['list'][4]['dt'])
+    forecastWeather2 = json_object2['list'][4]['weather'][0]['description']
+    forecastTemperature2 = json_object2['list'][4]['main']['temp']
+    forecastHumidity2 = json_object2['list'][4]['main']['humidity']
+    forecastPressure2 = json_object2['list'][4]['main']['pressure']
+    forecastWindSpeed2 = json_object2['list'][4]['wind']['speed']
+    forecastTime3 = time_converter(json_object2['list'][6]['dt'])
+    forecastWeather3 = json_object2['list'][6]['weather'][0]['description']
+    forecastTemperature3 = json_object2['list'][6]['main']['temp']
+    forecastHumidity3 = json_object2['list'][6]['main']['humidity']
+    forecastPressure3 = json_object2['list'][6]['main']['pressure']
+    forecastWindSpeed3 = json_object2['list'][6]['wind']['speed']
+    forecastTime4 = time_converter(json_object2['list'][8]['dt'])
+    forecastWeather4 = json_object2['list'][8]['weather'][0]['description']
+    forecastTemperature4 = json_object2['list'][8]['main']['temp']
+    forecastHumidity4 = json_object2['list'][8]['main']['humidity']
+    forecastPressure4 = json_object2['list'][8]['main']['pressure']
+    forecastWindSpeed4 = json_object2['list'][8]['wind']['speed']
+
     #print("Dashboard")
-    return render_template('dashboard.html', devices=devices)
+    return render_template('dashboard.html', devices=devices, sky=sky, temp=temp, pressure=pressure, humidity=humidity, tempMax=tempMax, tempMin=tempMin, visibility=visibility, windSpeed=windSpeed, windDegree=windDegree, cloudiness=cloudiness, sunrise=sunrise, sunset=sunset, city=city, country=country, forecastTime1=forecastTime1, forecastWeather1=forecastWeather1, forecastHumidity1=forecastHumidity1, forecastPressure1=forecastPressure1, forecastWindSpeed1=forecastWindSpeed1, forecastTime2=forecastTime2, forecastWeather2=forecastWeather2, forecastHumidity2=forecastHumidity2, forecastPressure2=forecastPressure2, forecastWindSpeed2=forecastWindSpeed2, forecastTime3=forecastTime3, forecastWeather3=forecastWeather3, forecastHumidity3=forecastHumidity3, forecastPressure3=forecastPressure3, forecastWindSpeed3=forecastWindSpeed3,  forecastTime4=forecastTime4, forecastWeather4=forecastWeather4, forecastTemperature1=forecastTemperature1, forecastTemperature2=forecastTemperature2, forecastTemperature3=forecastTemperature3, forecastTemperature4=forecastTemperature4, forecastHumidity4=forecastHumidity4, forecastPressure4=forecastPressure4, forecastWindSpeed4=forecastWindSpeed4)
     
 # Register route
 @app.route('/register', methods=['GET', 'POST'])
@@ -320,26 +425,22 @@ def streamTemp():
     #print("stream requested/posted")
     return Response(streamTemp_data(), mimetype="text/event-stream")
   
-# Humidity Data Upload Route
-@app.route('/streamHumi/', methods=['GET', 'POST'])
-def streamHumi():
-    # gevent.sleep(1)
-    #print("stream requested/posted")
-    return Response(streamHumi_data(), mimetype="text/event-stream")
- 
-# Soil Moisture Data Upload Route   
-@app.route('/streamSoil/', methods=['GET', 'POST'])
-def streamSoil():
-    # gevent.sleep(1)
-    #print("stream requested/posted")
-    return Response(streamSoil_data(), mimetype="text/event-stream")
-
 # Highcharts Route
 @app.route('/streamTemperatureChart/', methods=['GET', 'POST'])
 def streamTemperatureChart():
     # gevent.sleep(1)
     #print("stream requested/posted")
     return Response(streamTemperatureChart_Data(), mimetype="text/event-stream")
+
+# Temperature Analysis Data Route
+@app.route('/streamTemperatureAnalysis/', methods=['GET', 'POST'])
+def streamTemperatureAnalysis():
+    return Response(streamTemperatureAnalysis_data(), mimetype="text/event-stream")
+
+# Humidity Analysis Data Route
+@app.route('/streamHumidityAnalysis/', methods=['GET', 'POST'])
+def streamHumidityAnalysis():
+    return Response(streamHumidityAnalysis_data(), mimetype="text/event-stream")
     
 # Device Control Route
 @app.route('/devices', methods=['POST'])
@@ -364,13 +465,15 @@ def decives():
 if __name__ == '__main__':
     try:
         thTemp = threading.Thread(target=log_temp, args=("temp_logger",))
-        thHumi = threading.Thread(target=log_humidity, args=("humidity_logger",))
-        thSoil = threading.Thread(target=log_soil, args=("soil_logger",))
         thTempChart = threading.Thread(target=log_tempChart, args=("tempChart_logger",))
-        thTemp.start()
-        thHumi.start()
-        thSoil.start()
+        thTempAnalysis = threading.Thread(target=log_tempAnalysis, args=("tempAnalysis_logger",))
+        thHumiAnalysis = threading.Thread(target=log_humiAnalysis, args=("humiAnalysis_logger",))
+        
+        thTemp.start()   
         thTempChart.start()
+        thTempAnalysis.start()
+        thHumiAnalysis.start()
+
         print ("Thread(s) started..")
     except:
         print ("Error: unable to start thread(s)")
@@ -380,6 +483,7 @@ if __name__ == '__main__':
         try:
             app.secret_key = 'verySecret#123'
             app.run(debug=True, threaded = True, host='127.0.0.1', port=5000)
+            # app.run(debug=True, threaded = True, host='192.168.1.68', port=5000)
 
         except:
             print ("Streaming stopped")
