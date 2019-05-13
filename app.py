@@ -133,7 +133,7 @@ def log_tempAnalysis(name):
     while True:
         global temperatureMean_value, temperatureMedian_value, temperatureMode_value
         connection = engine.connect()
-        temperatureMean_value = connection.execute("select Temperature_Mean from Temperature_Analysis where Temperature_Mean is not null order by Data_ID DESC limit 1")
+        temperatureMean_value = connection.execute("select Temperature_Mean from Temperature_Analysis_Mean where Temperature_Mean is not null order by Data_ID DESC limit 1")
         for row in temperatureMean_value:
             tempMean = row['Temperature_Mean']
             global temperatureMeanValue
@@ -141,7 +141,7 @@ def log_tempAnalysis(name):
         connection.close()
 
         connection = engine.connect()
-        temperatureMedian_value = connection.execute("select Temperature_Median from Temperature_Analysis where Temperature_Median is not null order by Data_ID DESC limit 1")
+        temperatureMedian_value = connection.execute("select Temperature_Median from Temperature_Analysis_Median where Temperature_Median is not null order by Data_ID DESC limit 1")
         for row in temperatureMedian_value:
             tempMedian = row['Temperature_Median']
             global temperatureMedianValue
@@ -149,7 +149,7 @@ def log_tempAnalysis(name):
         connection.close()
 
         connection = engine.connect()
-        temperatureMode_value = connection.execute("select Temperature_Mode from Temperature_Analysis where Temperature_Mode is not null order by Data_ID DESC limit 1")
+        temperatureMode_value = connection.execute("select Temperature_Mode from Temperature_Analysis_Mode where Temperature_Mode is not null order by Data_ID DESC limit 1")
         for row in temperatureMode_value:
             tempMode = row['Temperature_Mode']
             global temperatureModeValue
@@ -169,7 +169,7 @@ def log_humiAnalysis(name):
     while True:
         global humidityMean_value, humidityMedian_value, humidityMode_value
         connection = engine.connect()
-        humidityMean_value = connection.execute("select Humidity_Mean from Humidity_Analysis where Humidity_Mean is not null order by Data_ID DESC limit 1")
+        humidityMean_value = connection.execute("select Humidity_Mean from Humidity_Analysis_Mean where Humidity_Mean is not null order by Data_ID DESC limit 1")
         for row in humidityMean_value:
             humiMean = row['Humidity_Mean']
             global humidityMeanValue
@@ -177,7 +177,7 @@ def log_humiAnalysis(name):
         connection.close()
 
         connection = engine.connect()
-        humidityMedian_value = connection.execute("select Humidity_Median from Humidity_Analysis where Humidity_Median is not null order by Data_ID DESC limit 1")
+        humidityMedian_value = connection.execute("select Humidity_Median from Humidity_Analysis_Median where Humidity_Median is not null order by Data_ID DESC limit 1")
         for row in humidityMedian_value:
             humiMedian = row['Humidity_Median']
             global humidityMedianValue
@@ -185,7 +185,7 @@ def log_humiAnalysis(name):
         connection.close()
 
         connection = engine.connect()
-        humidityMode_value = connection.execute("select Humidity_Mode from Humidity_Analysis where Humidity_Mode is not null order by Data_ID DESC limit 1")
+        humidityMode_value = connection.execute("select Humidity_Mode from Humidity_Analysis_Mode where Humidity_Mode is not null order by Data_ID DESC limit 1")
         for row in humidityMode_value:
             humiMode = row['Humidity_Mode']
             global humidityModeValue
