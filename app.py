@@ -217,8 +217,19 @@ def streamTemperatureChart_Data():
     #print("Starting streaming")
     while True:
         if not qTempChart.empty() and not qHumiChart.empty():
-            resultTempChart = [(time.time())*1000, temperatureChartValue, humidityChartValue]
+            resultTempChart = [(time.time())*1000, temperatureChartValue]
             yield 'data: ' + json.dumps(resultTempChart) + "\n\n"
+            gevent.sleep(1)
+        else:
+            gevent.sleep(1) # Try again after 1 sec
+            # os._exit(1)
+
+def streamHumidityChart_Data():
+    print("Starting streaming")
+    while True:
+        if not qTempChart.empty() and not qHumiChart.empty():
+            resultHumiChart = [(time.time())*1000, humidityChartValue]
+            yield 'data: ' + json.dumps(resultHumiChart) + "\n\n"
             gevent.sleep(1)
         else:
             gevent.sleep(1) # Try again after 1 sec
@@ -431,6 +442,13 @@ def streamTemperatureChart():
     # gevent.sleep(1)
     #print("stream requested/posted")
     return Response(streamTemperatureChart_Data(), mimetype="text/event-stream")
+
+@app.route('/streamHumidityChart/', methods=['GET', 'POST'])
+def streamHumidityChart():
+    # gevent.sleep(1)
+    #print("stream requested/posted")
+    return Response(streamHumidityChart_Data(), mimetype="text/event-stream")
+
 
 # Temperature Analysis Data Route
 @app.route('/streamTemperatureAnalysis/', methods=['GET', 'POST'])

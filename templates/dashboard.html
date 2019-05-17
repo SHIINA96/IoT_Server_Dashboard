@@ -3,15 +3,6 @@
 {% block body %}
 
   <div class="row">
-    <!-- Chart Section Begin -->
-    <div class="col s12 m12 l8">
-        <p class="z-depth-5">
-          <div class="container-fluid" id="data-container"></div>
-          <div id="TemperatureChart"></div>
-        </p>
-    </div>
-    <!-- Chart Section End -->
-
     <div id="card-stats">
     <!-- Card Section Begin -->
     
@@ -95,9 +86,56 @@
           
         </div>
       </div>
+
+      <!-- Chart Section Begin -->
+        <div class="col s12 m12 l12">
+          <p class="z-depth-5">
+            <div class="container-fluid" id="data-container1"></div>
+            <div id="TemperatureChart"></div>
+            <div class="container-fluid" id="humidity-chart-data-container"></div>
+          </p>
+      </div>
+      <!-- Chart Section End -->
       
     </div>
     <!-- Card Seciton End -->
+  </div>
+
+  <div class="row">
+    <div class="col s12 m12 l12">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">Analysis</span>
+            <div id="Analysis Table">
+                  <table>
+                    <thead>
+                      <tr>
+                          <th>Type</th>
+                          <th>Mean</th>
+                          <th>Median</th>
+                          <th>Mode</th>
+                      </tr>
+                    </thead>
+            
+                    <tbody>
+                      <tr>
+                        <td>Temperature</td>
+                        <td id="tempMean"></td>
+                        <td id="tempMedian"></td>
+                        <td id="tempMode"></td>
+                      </tr>
+                      <tr>
+                        <td>Humidity</td>
+                        <td id="humiMean"></td>
+                        <td id="humiMedian"></td>
+                        <td id="humiMode"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+            </div>
+          </div>
+      </div>
+    </div>
   </div>
 
   
@@ -246,44 +284,7 @@
           </div>
       </div>
     </div>
-  </div>
-
-  <div class="row">
-      <div class="col s12 m12 l12">
-        <div class="card">
-          <div class="card-content">
-            <span class="card-title">Analysis</span>
-              <div id="Analysis Table">
-                    <table>
-                      <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Mean</th>
-                            <th>Median</th>
-                            <th>Mode</th>
-                        </tr>
-                      </thead>
-              
-                      <tbody>
-                        <tr>
-                          <td>Temperature</td>
-                          <td id="tempMean"></td>
-                          <td id="tempMedian"></td>
-                          <td id="tempMode"></td>
-                        </tr>
-                        <tr>
-                          <td>Humidity</td>
-                          <td id="humiMean"></td>
-                          <td id="humiMedian"></td>
-                          <td id="humiMode"></td>
-                        </tr>
-                      </tbody>
-                    </table>
-              </div>
-            </div>
-        </div>
-      </div>
- 
+  </div> 
 
 {% endblock %}
 
@@ -406,108 +407,162 @@ enableCookieCheckBox();
   listenTemperatureAnalysis();
   listenHumidityAnalysis();
 
-  var chartTempValue;
-  var chartHumiValue;
-  function listenChart() {
+  function listenTempChart() {
     var source = new EventSource("/streamTemperatureChart/");
-
+    //var target = document.getElementById("TemperatureChart");
     source.onmessage = function(msg) {
-        var point = JSON.parse(msg["data"]);
-        chartTempValue = point[1];
-        chartHumiValue = point[2];
+        // console.log(msg.data);
+        var pointTemp = JSON.parse(msg["data"]);
+        console.log(pointTemp[0]);
+        console.log(pointTemp[1]);
+        //target.innerHTML = msg.data + '<br>';
 
-        var series = chart.series[0], shift = series.data.length > 20; // shift if the series is // longer than 20
+        var series = chartTemp.series[0], shift = series.data.length > 20; // shift if the series is // longer than 20
+        //console.log(series.data.length)
 
         // add the point
-        var newPoint1 = [point[0],point[1]];
-        var newPoint2 = [point[0],point[2]];
-
-        chart.series[0].addPoint(newPoint1, true, shift);
-        chart.series[1].addPoint(newPoint2, true, shift);
+        chartTemp.series[0].addPoint(pointTemp, true, shift);
+        // console.log(chart.series[0]);
     }
-}
+  }
 
+  function listenHumiChart() {
+    var source = new EventSource("/streamHumidityChart/");
+    //var target = document.getElementById("TemperatureChart");
+    source.onmessage = function(msg) {
+        // console.log(msg.data);
+        var pointHumi = JSON.parse(msg["data"]);
+        console.log(pointHumi[0]);
+        console.log(pointHumi[1]);
+        //target.innerHTML = msg.data + '<br>';
 
-chart = new Highcharts.Chart({
-  chart: {
-      //marginRight: 100,
-      height: 625,
-      renderTo: 'data-container',
-      defaultSeriesType: 'spline',
-      shadow: true,
-      events: {
-          load: listenChart
-      }
-  },
-  time: {
-      useUTC: false
-  },
-  title: {
-      text: 'Live Temperature & Humidity Data',
-      align: 'left'
-  },
-  subtitle: {
-      text: 'Power by Highcharts',
-      align: 'left'
-  },
-  xAxis: {
-      type: 'datetime',
-      tickPixelInterval: 150,
-      maxZoom: 20 * 1000
-  },
-  yAxis: [{ // Primary yAxis
-      labels: {
-          format: '{value}',
-          style: {
-              color: '#808080' //Highcharts.getOptions().colors[3]
-          }
-      },
-      title: {
-          text: 'Temperature / ℃',
-          style: {
-              color: Highcharts.getOptions().colors[0]
-          }
-      },
-      opposite: false
+        var series2 = chartHumi.series[0], shift = series2.data.length > 20; // shift if the series is // longer than 20
+        //console.log(series.data.length)
 
-  }, { // Secondary yAxis
-      gridLineWidth: 0,
-      labels: {
-        format: '{value}',
-        style: {
-            color: Highcharts.getOptions().colors[1]
+        // add the point
+        chartHumi.series[0].addPoint(pointHumi, true, shift);
+        // console.log(chart.series[0]);
+    }
+  }
+
+  chartTemp = new Highcharts.Chart({
+    chart: {
+        height: (9 / 40 * 100) + '%' ,
+        renderTo: 'data-container1',
+        defaultSeriesType: 'spline',
+        shadow: true,
+        events: {
+            load: listenTempChart
         }
     },
-      title: {
-          text: 'Humidity / %rh',
-          style: {
-              color: Highcharts.getOptions().colors[1]
-          }
-      },
-      opposite: false,
-  }],
-  legend: {
-      layout: 'vertical',
-      align: 'left',
-      x: 80,
-      verticalAlign: 'top',
-      y: 55,
-      floating: true,
-      backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || 'rgba(255,255,255,0.25)'
-  },
-  series: [{
-      name: 'Temperature Value',
-      tooltip: {
-          valueSuffix: ' °C'
-      },
-      data: chartTempValue
-      },
-      {
-      name: 'Humidity Value',
-      tooltip: {
-      valueSuffix: ' %rh'
-      },
-      data: chartHumiValue
-  }],
-});
+    time: {
+        useUTC: false
+    },
+    title: {
+        text: 'Live Temperature Data',
+        align: 'left'
+    },
+    subtitle: {
+        text: 'Power by Highcharts',
+        align: 'left'
+    },
+    xAxis: {
+        type: 'datetime',
+        tickPixelInterval: 150,
+        maxZoom: 20 * 1000
+    },
+    yAxis: [{
+        gridLineWidth: 0,
+        labels: {
+            format: '{value}',
+            style: {
+                color: '#808080' //Highcharts.getOptions().colors[3]
+            }
+        },
+        title: {
+            text: 'Temperature / ℃',
+            style: {
+                color: Highcharts.getOptions().colors[0]
+            }
+        },
+        opposite: false
+    }],
+    legend: {
+        layout: 'vertical',
+        align: 'left',
+        x: 80,
+        verticalAlign: 'top',
+        y: 55,
+        floating: true,
+        backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || 'rgba(255,255,255,0.25)'
+    },
+    series: [{
+        name: 'Temperature Value',
+        data: [],
+        color: Highcharts.getOptions().colors[0]
+    }]
+  });
+
+  chartHumi = new Highcharts.Chart({
+    chart: {
+      height: (9 / 40 * 100) + '%' ,
+        renderTo: 'humidity-chart-data-container',
+        defaultSeriesType: 'spline',
+        shadow: true,
+        events: {
+            load: listenHumiChart
+        }
+    },
+    time: {
+        useUTC: false
+    },
+    title: {
+        text: 'Live Humidity Data',
+        align: 'left'
+    },
+    subtitle: {
+        text: 'Power by Highcharts',
+        align: 'left'
+    },
+    xAxis: {
+        type: 'datetime',
+        tickPixelInterval: 150,
+        maxZoom: 20 * 1000
+    },
+    yAxis: { // Secondary yAxis
+        gridLineWidth: 0,
+        labels: {
+            format: '{value}',
+            style: {
+                color: Highcharts.getOptions().colors[1]
+            }
+        },
+        title: {
+            text: 'Humidity / %rh',
+            style: {
+                color: Highcharts.getOptions().colors[1]
+            }
+        },
+        opposite: false,
+    },
+    legend: {
+        layout: 'vertical',
+        align: 'left',
+        x: 80,
+        verticalAlign: 'top',
+        y: 55,
+        floating: true,
+        backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || 'rgba(255,255,255,0.25)'
+    },
+    series: [{
+        name: 'Humidity Value',
+        tooltip: {
+        valueSuffix: ' %rh'
+        },
+        data: [],
+        color: Highcharts.getOptions().colors[1]
+    }],
+  });
+
+  
 {% endblock %}
