@@ -5,7 +5,7 @@ Display temperature, humidity and soil moisture data in real-time.
 ### MySQL Database
 The query files are included in my another repo, you can check it here: [IoT System with ESP32](https://github.com/SHIINA96/IoT_System_with_ESP32)
 ### Python & Flask
-The requirements will be upload latter.
+Using pip3 to install the requirements
 
 ## Thank To
 * [Materialize CSS](https://materializecss.com/getting-started.html)
